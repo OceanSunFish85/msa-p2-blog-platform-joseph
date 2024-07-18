@@ -1,18 +1,17 @@
-// src/theme/theme.ts
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
 export const lightTheme: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
-      main: '#1976d2', // 设置你喜欢的颜色
+      main: '#f5f5f5',
     },
     secondary: {
-      main: '#f50057',
+      main: '#dc004e',
     },
     background: {
-      default: '#ffffff',
-      paper: '#f5f5f5',
+      default: '#f5f5f5',
+      paper: '#ffffff',
     },
   },
 };
@@ -21,13 +20,13 @@ export const darkTheme: ThemeOptions = {
   palette: {
     mode: 'dark',
     primary: {
-      main: '#90caf9', // 设置你喜欢的颜色
+      main: '#90caf9',
     },
     secondary: {
-      main: '#f50057',
+      main: '#f48fb1',
     },
     background: {
-      default: '#121212',
+      default: '#303030',
       paper: '#424242',
     },
   },
