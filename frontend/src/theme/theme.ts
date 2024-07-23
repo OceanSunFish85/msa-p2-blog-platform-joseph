@@ -4,14 +4,22 @@ export const lightTheme: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
-      main: '#f5f5f5',
+      main: '#ffffff', // 白色
     },
     secondary: {
-      main: '#dc004e',
+      main: '#6B46C1', // 淡紫色
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: '#ffffff', // 白色
+      paper: '#e0e0e0', // 灰色
+    },
+    text: {
+      primary: '#000000', // 黑色
+      secondary: '#ffffff', // 灰色
+    },
+    action: {
+      selected: '#6B46C1', // 自定义选中颜色
+      hover: '#6B46C1', // 自定义悬停颜色
     },
   },
 };
@@ -20,14 +28,18 @@ export const darkTheme: ThemeOptions = {
   palette: {
     mode: 'dark',
     primary: {
-      main: '#90caf9',
+      main: '#303030', // 深灰色
     },
     secondary: {
-      main: '#f48fb1',
+      main: '#4b0082', // 深紫色
     },
     background: {
-      default: '#303030',
-      paper: '#424242',
+      default: '#121212', // 深灰色
+      paper: '#1e1e1e', // 更深的灰色
+    },
+    text: {
+      primary: '#ffffff', // 白色
+      secondary: '#bbbbbb', // 浅灰色
     },
   },
 };
