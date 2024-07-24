@@ -18,6 +18,8 @@ import GlobalStyle from './theme/globalStyles';
 import { RootState } from './store/store';
 import Footer from './Layout/Footer';
 import AccountPage from './Components/AccountPage';
+import DetailPage from './Components/DetailPage';
+import NewPost from './Components/NewPost';
 
 const App: React.FC = () => {
   const theme = useSelector((state: RootState) => state.global.theme);
@@ -44,6 +46,8 @@ const App: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<HomePage />} /> {/* 默认页面 */}
                   <Route path="/account" element={<AccountPage />} />{' '}
+                  <Route path="/detail" element={<DetailPage />} />{' '}
+                  <Route path="/newPost" element={<NewPost />} />{' '}
                   {/* 默认页面 */}
                   {/* Add other routes here */}
                 </Routes>

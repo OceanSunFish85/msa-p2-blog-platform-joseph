@@ -80,6 +80,10 @@ const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const handleNewPostClick = () => {
+    navigate('/newPost');
+  };
+
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -143,8 +147,8 @@ const Header: React.FC = () => {
         <MenuItem component={Link} to="/" onClick={toggleDrawer(false)}>
           <ListItemText primary="Home" />
         </MenuItem>
-        <MenuItem component={Link} to="/articles" onClick={toggleDrawer(false)}>
-          <ListItemText primary="Articles" />
+        <MenuItem component={Link} to="/detail" onClick={toggleDrawer(false)}>
+          <ListItemText primary="Detail" />
         </MenuItem>
       </List>
     </Drawer>
@@ -209,17 +213,17 @@ const Header: React.FC = () => {
                   <Button sx={{ color: 'inherit' }}>Home</Button>
                 </Link>
                 <Link
-                  to="/articles"
+                  to="/detail"
                   style={{
                     textDecoration: 'none',
                     color: 'inherit',
                     borderBottom:
-                      location.pathname === '/articles'
+                      location.pathname === '/detail'
                         ? `2px solid ${theme.palette.secondary.main}`
                         : 'none',
                   }}
                 >
-                  <Button sx={{ color: 'inherit' }}>Articles</Button>
+                  <Button sx={{ color: 'inherit' }}>Detail</Button>
                 </Link>
               </Box>
             </Grid>
@@ -271,6 +275,7 @@ const Header: React.FC = () => {
                   color="secondary"
                   startIcon={<AddIcon />}
                   sx={{ marginLeft: theme.spacing(2) }}
+                  onClick={handleNewPostClick}
                 >
                   New Post
                 </Button>
