@@ -1,3 +1,4 @@
+using Data;
 using Microsoft.EntityFrameworkCore;
 using Repositories;
 
@@ -7,18 +8,25 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Configure DbContext before building the app
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDbContext<StudentContext>(options =>
-        options.UseInMemoryDatabase("Student"));
-}
-else
-{
-    builder.Services.AddDbContext<StudentContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("StudentContext") ?? throw new InvalidOperationException("Connection string 'StudentContext' not found.")));
-}
+// if (builder.Environment.IsDevelopment())
+// {
+//     builder.Services.AddDbContext<BlogPlatformContext>(options =>
+//         options.UseInMemoryDatabase("BlogPlatform"));
+// }
+// else
+// {
+//     builder.Services.AddDbContext<BlogPlatformContext>(options =>
+//         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")));
+// }
 
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+// Configure DbContext before building the app
+builder.Services.AddDbContext<BlogPlatformContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    options.UseSqlServer(connectionString);
+});
+
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 
 builder.Services.AddCors(options =>
 {
