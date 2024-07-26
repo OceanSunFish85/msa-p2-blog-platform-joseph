@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using backend.Data;
+using backend.Entities;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,6 +56,8 @@ builder.Services.AddDbContext<BlogWebDbContext>(opt =>
 
 // Register our TokenService dependency
 builder.Services.AddScoped<TokenService, TokenService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ArticleService>();
 
 // Support string to enum conversions
 builder.Services.AddControllers().AddJsonOptions(opt =>

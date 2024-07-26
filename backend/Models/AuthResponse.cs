@@ -1,8 +1,10 @@
-namespace backend.Models;
-
-public class AuthResponse
+namespace backend.Modals
 {
-    public string? Username { get; set; }
-    public string? Email { get; set; }
-    public string? Token { get; set; }
+
+    public class AuthResponse
+    {
+        public string? Username { get; set; }
+        public string? Email { get; set; }
+        public string? Token { get; set; }
+    }
 }

@@ -1,10 +1,9 @@
 namespace backend.Services;
-
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
-using backend.Models;
+using backend.Entities;
 
 public class TokenService
 {
