@@ -1,7 +1,9 @@
-namespace backend.Models;
-
-public class AuthRequest
+namespace backend.Modals
 {
-    public string? Email { get; set; }
-    public string? Password { get; set; }
+
+    public class AuthRequest
+    {
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+    }
 }

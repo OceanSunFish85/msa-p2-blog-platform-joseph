@@ -1,5 +1,7 @@
 using backend.Data;
+using backend.Entities;
 using backend.Enums;
+using backend.Modals;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Identity;
@@ -33,10 +35,17 @@ public class AuthenticateController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await _userManager.CreateAsync(
-            new ApplicationUser { UserName = request.Username, Email = request.Email, Role = request.Role },
-            request.Password!
-        );
+        var user = new ApplicationUser
+        {
+            UserName = request.Username,
+            Email = request.Email,
+            Role = request.Role,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            UserStatus = request.UserStatus,
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password!);
 
         if (result.Succeeded)
         {

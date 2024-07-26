@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using backend.Models;
+using backend.Entities;
 
 namespace backend.Data
 {
@@ -11,6 +11,10 @@ namespace backend.Data
         {
         }
 
+        //Add more DbSet for other entities
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<ArticleContent> ArticleContents { get; set; }
+        public DbSet<ArticleMedia> ArticleMedias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
