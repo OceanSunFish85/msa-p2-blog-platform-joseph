@@ -18,13 +18,13 @@ namespace backend.Services
             _logger = logger;
         }
 
-        public async Task<UserProfileDto> GetUserProfileAsync(string email)
+        public async Task<UserBasicInfo> GetUserBasicInfoAsync(string email)
         {
             _logger.LogInformation("Getting user profile for email: {Email}", email);
 
             var user = await _context.Users
                 .Where(u => u.Email == email)
-                .Select(u => new UserProfileDto
+                .Select(u => new UserBasicInfo
                 {
                     Id = u.Id,
                     UserName = u.UserName,
@@ -34,7 +34,7 @@ namespace backend.Services
                     Avatar = u.Avatar,
                     Bio = u.Bio,
                     UserStatus = Enum.Parse<UserStatus>(u.UserStatus.ToString()),
-                    LastLogin = u.LastLogin
+                    Role = u.Role,
                 })
                 .SingleOrDefaultAsync();
 

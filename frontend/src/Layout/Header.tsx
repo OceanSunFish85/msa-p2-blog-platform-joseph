@@ -12,6 +12,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { styled, alpha } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import AddIcon from '@mui/icons-material/Add';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import {
   useTheme,
   useMediaQuery,
@@ -23,6 +25,11 @@ import {
   Button,
   Grid,
 } from '@mui/material';
+import { useAppSelector } from '../store/useAppSelecter';
+import { RootState } from '../store/store';
+import { useAppDispatch } from '../store/useAppDispatch';
+import { logout } from '../store/slices/auth';
+import { toggleTheme } from '../store/slices/global';
 
 // 自定义搜索框样式
 const Search = styled('div')(({ theme }) => ({
@@ -80,6 +87,12 @@ const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+  const muiTheme = useAppSelector((state: RootState) => state.global.theme);
+
   const handleNewPostClick = () => {
     navigate('/newPost');
   };
@@ -90,6 +103,20 @@ const Header: React.FC = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleToggleTheme = () => {
+    dispatch(toggleTheme());
+  };
+
+  const handleAccountClick = () => {
+    navigate('/account');
+    setAnchorEl(null);
+  };
+  const handleUserLogout = () => {
+    dispatch(logout());
+    setAnchorEl(null);
+    navigate('/login');
   };
 
   const toggleDrawer =
@@ -109,14 +136,14 @@ const Header: React.FC = () => {
     <Menu
       anchorEl={anchorEl}
       anchorOrigin={{
-        vertical: 'top',
+        vertical: 'bottom',
         horizontal: 'right',
       }}
       id="primary-search-account-menu"
       keepMounted
       transformOrigin={{
         vertical: 'top',
-        horizontal: 'right',
+        horizontal: 'center',
       }}
       open={isMenuOpen}
       onClose={handleMenuClose}
@@ -136,8 +163,8 @@ const Header: React.FC = () => {
         },
       }}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleAccountClick}>Account</MenuItem>
+      <MenuItem onClick={handleUserLogout}>Logout</MenuItem>
     </Menu>
   );
 
@@ -245,40 +272,80 @@ const Header: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-                <Link
-                  to="/account"
-                  style={{
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    borderBottom:
-                      location.pathname === '/account'
-                        ? `2px solid ${theme.palette.secondary.main}`
-                        : 'none',
-                  }}
-                >
-                  <Button sx={{ color: 'inherit' }}>Account</Button>
-                </Link>
-                <IconButton
-                  edge="end"
-                  aria-label="account of current user"
-                  aria-controls="primary-search-account-menu"
-                  aria-haspopup="true"
-                  onClick={handleProfileMenuOpen}
-                  color="inherit"
-                  sx={{ marginRight: theme.spacing(0) }}
-                >
-                  <AccountCircle />
-                </IconButton>
-                <Box flexGrow={1}></Box>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  startIcon={<AddIcon />}
-                  sx={{ marginLeft: theme.spacing(2) }}
-                  onClick={handleNewPostClick}
-                >
-                  New Post
-                </Button>
+                {isAuthenticated ? (
+                  <>
+                    {/* <Link
+                      to="/account"
+                      style={{
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        borderBottom:
+                          location.pathname === '/account'
+                            ? `2px solid ${theme.palette.secondary.main}`
+                            : 'none',
+                      }}
+                    >
+                      <Button sx={{ color: 'inherit' }}>Account</Button>
+                    </Link> */}
+                    <IconButton onClick={handleToggleTheme} color="inherit">
+                      {muiTheme === 'light' ? (
+                        <Brightness4Icon />
+                      ) : (
+                        <Brightness7Icon />
+                      )}
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label="account of current user"
+                      aria-controls="primary-search-account-menu"
+                      aria-haspopup="true"
+                      onClick={handleProfileMenuOpen}
+                      color="inherit"
+                      sx={{ marginRight: theme.spacing(0) }}
+                    >
+                      <AccountCircle />
+                    </IconButton>
+                    <Box flexGrow={1}></Box>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      startIcon={<AddIcon />}
+                      sx={{ marginLeft: theme.spacing(2) }}
+                      onClick={handleNewPostClick}
+                    >
+                      New Post
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      style={{
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        borderBottom:
+                          location.pathname === '/login'
+                            ? `2px solid ${theme.palette.secondary.main}`
+                            : 'none',
+                      }}
+                    >
+                      <Button sx={{ color: 'inherit' }}>Login</Button>
+                    </Link>
+                    <Link
+                      to="/register"
+                      style={{
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        borderBottom:
+                          location.pathname === '/register'
+                            ? `2px solid ${theme.palette.secondary.main}`
+                            : 'none',
+                      }}
+                    >
+                      <Button sx={{ color: 'inherit' }}>Sign Up</Button>
+                    </Link>
+                  </>
+                )}
               </Box>
             </Grid>
           </Grid>
