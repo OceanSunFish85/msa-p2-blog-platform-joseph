@@ -24,7 +24,7 @@ namespace backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("profile")]
+        [HttpGet("basicinfo")]
         public async Task<IActionResult> GetUserProfile()
         {
             // 从 JWT 令牌中获取用户的电子邮件地址
@@ -37,7 +37,7 @@ namespace backend.Controllers
                 return Unauthorized(new { Message = "User is not authorized" });
             }
 
-            var user = await _userService.GetUserProfileAsync(userEmail);
+            var user = await _userService.GetUserBasicInfoAsync(userEmail);
 
             if (user == null)
             {

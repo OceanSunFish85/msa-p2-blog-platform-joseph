@@ -49,6 +49,20 @@ builder.Services.AddProblemDetails();
 builder.Services.AddApiVersioning();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // Replace with your React app URL
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+});
+
 // Add DB Contexts
 // Move the connection string to user secrets for release
 builder.Services.AddDbContext<BlogWebDbContext>(opt =>
@@ -122,8 +136,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Enable static files to be served from wwwroot
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 app.UseStatusCodePages();
+
+// Use CORS policy before authentication and authorization
+app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();

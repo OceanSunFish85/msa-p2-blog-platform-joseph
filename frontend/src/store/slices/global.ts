@@ -3,10 +3,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface GlobalState {
   theme: 'light' | 'dark';
+  isLoading: boolean;
 }
 
 const initialState: GlobalState = {
   theme: 'light',
+  isLoading: false,
 };
 
 const globalSlice = createSlice({
@@ -19,8 +21,11 @@ const globalSlice = createSlice({
     setTheme(state, action: PayloadAction<'light' | 'dark'>) {
       state.theme = action.payload;
     },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.isLoading = action.payload;
+    },
   },
 });
 
-export const { toggleTheme, setTheme } = globalSlice.actions;
+export const { toggleTheme, setTheme, setLoading } = globalSlice.actions;
 export default globalSlice;

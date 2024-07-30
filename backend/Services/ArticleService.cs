@@ -63,7 +63,7 @@ namespace backend.Services
             return article;
         }
 
-        public async Task<NewArticleRequest> GetArticleByIdAsync(int id)
+        public async Task<ArticleResponse?> GetArticleByIdAsync(int id)
         {
             // 获取文章及其内容
             var article = await _context.Articles
@@ -81,8 +81,9 @@ namespace backend.Services
                 .Where(m => m.ArticleId == id)
                 .ToListAsync();
 
-            return new NewArticleRequest
+            return new ArticleResponse
             {
+                Id = article.Id,
                 Title = article.Title,
                 AuthorEmail = article.AuthorEmail,
                 Summary = article.Summary,
@@ -90,14 +91,19 @@ namespace backend.Services
                 CategoryId = article.CategoryId,
                 HtmlContent = articleContent?.HtmlContent,
                 Status = article.Status,
+                Views = article.Views,
+                CommentsCount = article.CommentsCount,
+                Likes = article.Likes,
                 Media = articleMedia.Select(m => new ArticleMediaDto
                 {
+                    Id = m.Id,
                     Type = m.Type,
                     Url = m.Url,
                     AltText = m.AltText
                 }).ToList()
             };
         }
+
     }
 
 }
