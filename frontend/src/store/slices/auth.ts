@@ -2,6 +2,9 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { LoginRequest, LoginResponse } from '../../Models/Auth';
 import AuthService from '../../Services/AuthService';
+import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '../useAppDispatch';
+import { setLoading } from './global';
 
 export interface AuthState {
   username: string | null;
@@ -78,3 +81,6 @@ const authSlice = createSlice({
 export const { logout } = authSlice.actions;
 
 export default authSlice;
+function dispatch(arg0: { payload: boolean; type: 'global/setLoading' }) {
+  throw new Error('Function not implemented.');
+}

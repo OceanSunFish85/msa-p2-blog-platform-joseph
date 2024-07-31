@@ -1,23 +1,77 @@
-// namespace backend.Services{
-//     public class LocalFileStorageService
-// {
-//     private readonly string _articleMediaPath;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
-//     public LocalFileStorageService(IConfiguration configuration)
-//     {
-//         _articleMediaPath = configuration["FileStorage:ArticleMediaPath"];
-//     }
+namespace backend.Services
+{
 
-//     public async Task<string> UploadFileAsync(Stream fileStream, string fileName)
-//     {
-//         var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
-//         var filePath = Path.Combine(_articleMediaPath, uniqueFileName);
-//         Directory.CreateDirectory(_articleMediaPath); // Ensure the directory exists
-//         using (var fileStreamOutput = new FileStream(filePath, FileMode.Create))
-//         {
-//             await fileStream.CopyToAsync(fileStreamOutput);
-//         }
-//         return $"/uploads/{uniqueFileName}"; // Return the relative path for web access
-//     }
-// }
-// }
+
+    public class FileStorageService
+    {
+        private readonly string _uploadPath;
+        private readonly string _articleMediaPath;
+        private readonly string _avatarPath;
+        private readonly string _coverPath;
+        private readonly string _baseUrl;
+
+        public FileStorageService(IConfiguration configuration)
+        {
+            _uploadPath = configuration["FileStorage:UploadPath"] ?? "default/upload/path";
+            _articleMediaPath = configuration["FileStorage:ArticleMediaPath"] ?? "default/article/media/path";
+            _avatarPath = configuration["FileStorage:AvatarPath"] ?? "default/avatar/path";
+            _coverPath = configuration["FileStorage:CoverPath"] ?? "default/cover/path";
+            _baseUrl = configuration["FileStorage:BaseUrl"] ?? "http://localhost:5078";
+        }
+
+        public async Task<string> UploadAvatarAsync(IFormFile file)
+        {
+            return await SaveFileAsync(file, _avatarPath);
+        }
+
+        public async Task<string> UploadCoverAsync(IFormFile file)
+        {
+            return await SaveFileAsync(file, _coverPath);
+        }
+
+        public async Task<List<string>> UploadArticleMediaAsync(List<IFormFile> files)
+        {
+            var urls = new List<string>();
+
+            foreach (var file in files)
+            {
+                var filePath = Path.Combine(_articleMediaPath, $"{Guid.NewGuid()}_{file.FileName}");
+                Directory.CreateDirectory(_articleMediaPath);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                urls.Add($"{_baseUrl}/uploads/article-media/{Path.GetFileName(filePath)}"); // Modify this line to include base URL
+            }
+
+            return urls;
+        }
+
+        private static async Task<string> SaveFileAsync(IFormFile file, string path)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("No file uploaded");
+
+            var fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(path, fileName);
+
+            Directory.CreateDirectory(path);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return Path.Combine("/", path, fileName).Replace("\\", "/");
+        }
+    }
+}
