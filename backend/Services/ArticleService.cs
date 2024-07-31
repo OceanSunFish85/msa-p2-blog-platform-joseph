@@ -18,49 +18,69 @@ namespace backend.Services
 
         public async Task<Article> CreateArticleAsync(NewArticleRequest newArticleRequest)
         {
-            var articleContent = new ArticleContent
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                HtmlContent = newArticleRequest.HtmlContent
-            };
-            _context.ArticleContents.Add(articleContent);
-            await _context.SaveChangesAsync();
-
-            var article = new Article
-            {
-                Title = newArticleRequest.Title,
-                AuthorEmail = newArticleRequest.AuthorEmail,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Summary = newArticleRequest.Summary,
-                Cover = newArticleRequest.Cover,
-                CategoryId = newArticleRequest.CategoryId,
-                ContentId = articleContent.Id,
-                Status = newArticleRequest.Status,
-                Views = 0,
-                CommentsCount = 0,
-                Likes = 0
-            };
-            _context.Articles.Add(article);
-            await _context.SaveChangesAsync();
-
-            if (newArticleRequest.Media != null)
-            {
-                foreach (var mediaDto in newArticleRequest.Media)
+                try
                 {
-                    var articleMedia = new ArticleMedia
+                    // 创建并保存文章内容
+                    var articleContent = new ArticleContent
                     {
-                        Type = mediaDto.Type,
-                        Url = mediaDto.Url,
-                        AltText = mediaDto.AltText,
-                        ArticleId = article.Id,
-                        CreatedAt = DateTime.UtcNow
+                        HtmlContent = newArticleRequest.HtmlContent
                     };
-                    _context.ArticleMedias.Add(articleMedia);
-                }
-                await _context.SaveChangesAsync();
-            }
+                    _context.ArticleContents.Add(articleContent);
+                    await _context.SaveChangesAsync();
 
-            return article;
+                    // 创建并保存文章
+                    var article = new Article
+                    {
+                        Title = newArticleRequest.Title,
+                        AuthorEmail = newArticleRequest.AuthorEmail,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        Summary = newArticleRequest.Summary,
+                        Cover = newArticleRequest.Cover,
+                        CategoryId = newArticleRequest.CategoryId,
+                        ContentId = articleContent.Id,
+                        Status = newArticleRequest.Status,
+                        Views = 0,
+                        CommentsCount = 0,
+                        Likes = 0
+                    };
+                    _context.Articles.Add(article);
+                    await _context.SaveChangesAsync();
+
+                    // 创建并保存文章媒体
+                    if (newArticleRequest.Media != null)
+                    {
+                        foreach (var mediaDto in newArticleRequest.Media)
+                        {
+                            var articleMedia = new ArticleMedia
+                            {
+                                Type = mediaDto.Type,
+                                Url = mediaDto.Url,
+                                AltText = mediaDto.AltText,
+                                ArticleId = article.Id,
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            _context.ArticleMedias.Add(articleMedia);
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // 提交事务
+                    await transaction.CommitAsync();
+
+                    return article;
+                }
+                catch (Exception ex)
+                {
+                    // 回滚事务
+                    await transaction.RollbackAsync();
+                    // 记录异常
+                    // Log.Error(ex, "Error creating article");
+                    throw;
+                }
+            }
         }
 
         public async Task<ArticleResponse?> GetArticleByIdAsync(int id)

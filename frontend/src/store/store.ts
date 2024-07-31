@@ -3,6 +3,7 @@ import globalSlice from './slices/global';
 import authSlice from './slices/auth';
 import userSlice from './slices/user';
 import uploadSlice from './slices/upload';
+import aiSlice from './slices/ai';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     auth: authSlice.reducer,
     user: userSlice.reducer,
     upload: uploadSlice.reducer,
+    ai: aiSlice.reducer,
   },
 });
 
