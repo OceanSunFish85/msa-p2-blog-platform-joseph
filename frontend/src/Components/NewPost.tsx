@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import Delta from 'quill-delta';
 import {
   Box,
   Container,
@@ -13,18 +14,18 @@ import {
   Select,
   MenuItem,
   FormHelperText,
-  Divider,
-  Card,
-  List,
-  ListItem,
-  ListItemText,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  ListItem,
+  ListItemText,
+  List,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { SelectChangeEvent } from '@mui/material/Select';
+import { useAppDispatch } from '../store/useAppDispatch';
+import { uploadArticleMediaThunk } from '../store/slices/upload';
 
 const NewPost: React.FC = () => {
   const theme = useTheme();
@@ -38,6 +39,7 @@ const NewPost: React.FC = () => {
   const [headings, setHeadings] = useState<
     Array<{ id: string; text: string; level: number }>
   >([]); // State to store headings
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (quillRef.current && !hasInitializedQuill.current) {
@@ -126,6 +128,93 @@ const NewPost: React.FC = () => {
     setPreviewOpen(false);
   };
 
+  const dataURLToBlob = (dataURL: string): Blob => {
+    const arr = dataURL.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : ''; // 使用可选链操作符来安全地提取 MIME 类型
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
+  const extractImagesFromDelta = (delta: any) => {
+    const images: string[] = [];
+    delta.ops.forEach((op: any) => {
+      if (op.insert && op.insert.image) {
+        images.push(op.insert.image);
+      }
+    });
+    return images;
+  };
+
+  const isValidBase64 = (dataURL: string): boolean => {
+    const regex = /^data:image\/(png|jpeg|jpg|gif);base64,/;
+    return regex.test(dataURL);
+  };
+
+  const blobToFile = (blob: Blob, fileName: string): File => {
+    return new File([blob], fileName, { type: blob.type });
+  };
+
+  const replaceImagesInDelta = (delta: any, mediaUrls: string[]): any => {
+    const newDelta = JSON.parse(JSON.stringify(delta));
+    let imageIndex = 0;
+
+    newDelta.ops.forEach((op: any) => {
+      if (op.insert && op.insert.image) {
+        if (isValidBase64(op.insert.image) && imageIndex < mediaUrls.length) {
+          op.insert.image = mediaUrls[imageIndex++];
+        }
+      }
+    });
+
+    return newDelta;
+  };
+
+  const handleSubmit = async () => {
+    if (editorRef.current) {
+      const delta = editorRef.current.getContents();
+      //console.log('Delta format:', delta);
+
+      const images = extractImagesFromDelta(delta);
+      //console.log('Extracted images:', images);
+
+      const blobs = images
+        .map((image, index) => {
+          if (isValidBase64(image)) {
+            //console.log(`Image ${index + 1} is a valid Base64 URL.`);
+            return dataURLToBlob(image);
+          } else {
+            console.error(`Image ${index + 1} is not a valid Base64 URL.`);
+            return null;
+          }
+        })
+        .filter((blob) => blob !== null);
+
+      //console.log('Converted Blobs:', blobs);
+
+      const files = blobs.map((blob, index) =>
+        blobToFile(blob, `image${index + 1}.${blob.type.split('/')[1]}`)
+      );
+
+      try {
+        const mediaUrls = await dispatch(
+          uploadArticleMediaThunk(files)
+        ).unwrap();
+        //console.log('Uploaded media URLs:', mediaUrls);
+
+        const newDelta = replaceImagesInDelta(delta, mediaUrls.urls);
+        console.log('New Delta format:', newDelta);
+        editorRef.current.setContents(newDelta);
+      } catch (error) {
+        console.error('Failed to upload media:', error);
+      }
+    }
+  };
   return (
     <Box
       sx={{
@@ -272,7 +361,11 @@ const NewPost: React.FC = () => {
               <Button variant="contained" color="primary">
                 保存草稿
               </Button>
-              <Button variant="contained" color="secondary">
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleSubmit}
+              >
                 发布文章
               </Button>
               <Button

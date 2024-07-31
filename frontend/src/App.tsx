@@ -21,6 +21,8 @@ import AccountPage from './Components/AccountPage';
 import DetailPage from './Components/DetailPage';
 import NewPost from './Components/NewPost';
 import LoginPage from './Components/LoginPage';
+import GlobalSpin from './Components/GlobalSpin';
+import GlobalSkeleton from './Components/GlobalSkeleton';
 
 const App: React.FC = () => {
   const theme = useSelector((state: RootState) => state.global.theme);
@@ -44,6 +46,8 @@ const App: React.FC = () => {
           <Container maxWidth="xl" sx={{ flex: '1 0 auto' }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
+                <GlobalSpin />
+                <GlobalSkeleton />
                 <Routes>
                   <Route path="/" element={<HomePage />} /> {/* 默认页面 */}
                   <Route path="/login" element={<LoginPage />} />

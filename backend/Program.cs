@@ -72,6 +72,7 @@ builder.Services.AddDbContext<BlogWebDbContext>(opt =>
 builder.Services.AddScoped<TokenService, TokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ArticleService>();
+builder.Services.AddScoped<FileStorageService>();
 
 // Support string to enum conversions
 builder.Services.AddControllers().AddJsonOptions(opt =>
@@ -132,8 +133,14 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
 // Enable static files to be served from wwwroot

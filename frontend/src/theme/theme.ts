@@ -31,7 +31,7 @@ export const darkTheme: ThemeOptions = {
       main: '#303030', // 深灰色
     },
     secondary: {
-      main: '#4b0082', // 深紫色
+      main: '#6B46C1', // 深紫色
     },
     background: {
       default: '#121212', // 深灰色
