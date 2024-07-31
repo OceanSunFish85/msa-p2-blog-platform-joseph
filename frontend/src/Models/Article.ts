@@ -19,3 +19,11 @@ export interface NewArticleRequest {
   Status: ArticleStatus;
   Media?: ArticleMedia[];
 }
+
+export interface SummarizedRequest {
+  Inputs: string;
+}
+
+export interface SummarizedResponse {
+  summary_text: string;
+}

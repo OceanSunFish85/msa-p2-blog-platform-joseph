@@ -21,16 +21,28 @@ import {
   ListItem,
   ListItemText,
   List,
+  useMediaQuery,
+  Drawer,
+  Fab,
+  IconButton,
+  InputAdornment,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import SettingsIcon from '@mui/icons-material/Settings';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { useAppDispatch } from '../store/useAppDispatch';
 import { uploadArticleMediaThunk } from '../store/slices/upload';
+import { ArticleStatus } from '../Models/enums/ArticleStatus';
+import { useTheme } from '@mui/material/styles';
+import { generateSummaryThunk } from '../store/slices/ai';
 
 const NewPost: React.FC = () => {
   const theme = useTheme();
   const quillRef = useRef<HTMLDivElement | null>(null);
-  const [privacy, setPrivacy] = useState<string>('public');
+  const [privacy, setPrivacy] = useState<ArticleStatus>(
+    ArticleStatus.Published
+  );
   const [previewOpen, setPreviewOpen] = useState<boolean>(false);
   const [previewContent, setPreviewContent] = useState<string>('');
   const [title, setTitle] = useState<string>('');
@@ -40,6 +52,10 @@ const NewPost: React.FC = () => {
     Array<{ id: string; text: string; level: number }>
   >([]); // State to store headings
   const dispatch = useAppDispatch();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const [tocOpen, setTocOpen] = useState<boolean>(false);
+  const [summary, setSummary] = React.useState('');
 
   useEffect(() => {
     if (quillRef.current && !hasInitializedQuill.current) {
@@ -85,8 +101,8 @@ const NewPost: React.FC = () => {
     }
   }, []);
 
-  const handlePrivacyChange = (event: SelectChangeEvent<string>) => {
-    setPrivacy(event.target.value as string);
+  const handlePrivacyChange = (event: SelectChangeEvent<ArticleStatus>) => {
+    setPrivacy(event.target.value as ArticleStatus);
   };
 
   const handleHeadingClick = (id: string) => {
@@ -115,6 +131,24 @@ const NewPost: React.FC = () => {
         <ListItemText primary={heading.text} />
       </ListItem>
     ));
+  };
+
+  const handleGenerateSummary = async () => {
+    if (editorRef.current) {
+      const delta = editorRef.current.getContents();
+      const text = delta.reduce((acc: string, op: any) => {
+        if (typeof op.insert === 'string') {
+          return (
+            acc + op.insert.replace(/[\r\n]+/g, ' ').replace(/[^\w\s,\.]/gi, '')
+          );
+        }
+        return acc;
+      }, '');
+      console.log('Text:', text);
+      const result = await dispatch(generateSummaryThunk(text)).unwrap();
+      setSummary(result);
+      console.log('Summary:', result);
+    }
   };
 
   const handlePreviewOpen = () => {
@@ -234,41 +268,55 @@ const NewPost: React.FC = () => {
           position: 'relative',
         }}
       >
-        <Box
-          sx={{
-            position: 'fixed',
-            top: '100px',
-            left: '320px',
-            width: '260px',
-            padding: 2,
-            backgroundColor: theme.palette.background.default,
-            color: theme.palette.text.primary,
-            borderRadius: 1,
-            boxShadow: 3,
-          }}
-        >
-          <Typography variant="h6">目录</Typography>
-          <List>{renderHeadings(headings)}</List>
-        </Box>
+        <Grid container spacing={2}>
+          {!isMobile && (
+            <Grid item xs={12} md={3}>
+              <Box
+                sx={{
+                  position: 'sticky',
+                  top: '100px',
+                  padding: 2,
+                  backgroundColor: theme.palette.background.default,
+                  color: theme.palette.text.primary,
+                  borderRadius: 1,
+                  boxShadow: 3,
+                }}
+              >
+                <Typography variant="h6">Table of Content</Typography>
+                <List>{renderHeadings(headings)}</List>
+              </Box>
+            </Grid>
+          )}
 
-        <Grid
-          container
-          spacing={2}
-          sx={{ marginLeft: '220px', marginRight: '220px' }}
-        >
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
-              label="文章标题"
+              label="Title"
               variant="outlined"
               margin="normal"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               InputLabelProps={{
-                style: { color: theme.palette.text.primary },
+                sx: {
+                  color: theme.palette.text.primary,
+                  '&.Mui-focused': {
+                    color: theme.palette.secondary.main,
+                  },
+                },
               }}
-              InputProps={{ style: { color: theme.palette.text.primary } }}
+              InputProps={{
+                sx: {
+                  color: theme.palette.text.primary,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: theme.palette.text.secondary,
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: theme.palette.secondary.main,
+                  },
+                },
+              }}
             />
+
             <Box
               sx={{
                 backgroundColor: theme.palette.background.default,
@@ -280,105 +328,214 @@ const NewPost: React.FC = () => {
               <div ref={quillRef} style={{ height: '90%', width: '100%' }} />
             </Box>
           </Grid>
-        </Grid>
 
-        <Box
-          sx={{
-            position: 'fixed',
-            top: '100px',
-            right: '256px',
-            width: '300px',
-            padding: 2,
-            backgroundColor: theme.palette.background.default,
-            color: theme.palette.text.primary,
-            borderRadius: 1,
-            boxShadow: 3,
-          }}
-        >
-          <Typography variant="h6">文章设置</Typography>
-          <Box component="form" noValidate autoComplete="off">
-            <TextField
-              fullWidth
-              label="文章标签"
-              variant="outlined"
-              margin="normal"
-              InputLabelProps={{
-                style: { color: theme.palette.text.primary },
-              }}
-              InputProps={{ style: { color: theme.palette.text.primary } }}
-            />
-            <TextField
-              fullWidth
-              label="文章封面"
-              variant="outlined"
-              margin="normal"
-              InputLabelProps={{
-                style: { color: theme.palette.text.primary },
-              }}
-              InputProps={{ style: { color: theme.palette.text.primary } }}
-            />
-            <TextField
-              fullWidth
-              label="文章摘要"
-              variant="outlined"
-              multiline
-              rows={4}
-              margin="normal"
-              InputLabelProps={{
-                style: { color: theme.palette.text.primary },
-              }}
-              InputProps={{ style: { color: theme.palette.text.primary } }}
-            />
-            <FormControl fullWidth variant="outlined" margin="normal">
-              <InputLabel
-                id="privacy-select-label"
-                style={{ color: theme.palette.text.primary }}
+          {!isMobile && (
+            <Grid item xs={12} md={3}>
+              <Box
+                sx={{
+                  position: 'sticky',
+                  top: '100px',
+                  padding: 2,
+                  backgroundColor: theme.palette.background.default,
+                  color: theme.palette.text.primary,
+                  borderRadius: 1,
+                  boxShadow: 3,
+                }}
               >
-                隐私设置
-              </InputLabel>
-              <Select
-                labelId="privacy-select-label"
-                id="privacy-select"
-                value={privacy}
-                onChange={handlePrivacyChange}
-                label="隐私设置"
-                style={{ color: theme.palette.text.primary }}
-              >
-                <MenuItem value="public">公开</MenuItem>
-                <MenuItem value="private">私密</MenuItem>
-              </Select>
-              <FormHelperText style={{ color: theme.palette.secondary.main }}>
-                选择文章的隐私设置
-              </FormHelperText>
-            </FormControl>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: 2,
-              }}
-            >
-              <Button variant="contained" color="primary">
-                保存草稿
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleSubmit}
-              >
-                发布文章
-              </Button>
-              <Button
-                variant="contained"
-                color="inherit"
-                onClick={handlePreviewOpen}
-              >
-                预览
-              </Button>
-            </Box>
-          </Box>
-        </Box>
+                <Typography variant="h6">Article Setting</Typography>
+                <Box component="form" noValidate autoComplete="off">
+                  {/* <TextField
+                    fullWidth
+                    label="文章标签"
+                    variant="outlined"
+                    margin="normal"
+                    InputLabelProps={{
+                      sx: {
+                        color: theme.palette.text.primary,
+                        '&.Mui-focused': {
+                          color: theme.palette.secondary.main,
+                        },
+                      },
+                    }}
+                    InputProps={{
+                      sx: {
+                        color: theme.palette.text.primary,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.text.secondary,
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.secondary.main,
+                        },
+                      },
+                    }}
+                  /> */}
+                  <TextField
+                    fullWidth
+                    label="文章封面"
+                    variant="outlined"
+                    margin="normal"
+                    InputLabelProps={{
+                      sx: {
+                        color: theme.palette.text.primary,
+                        '&.Mui-focused': {
+                          color: theme.palette.secondary.main,
+                        },
+                      },
+                    }}
+                    InputProps={{
+                      sx: {
+                        color: theme.palette.text.primary,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.text.secondary,
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.secondary.main,
+                        },
+                      },
+                    }}
+                  />
+                  <Box position="relative">
+                    <TextField
+                      fullWidth
+                      label="文章摘要"
+                      variant="outlined"
+                      multiline
+                      rows={4}
+                      margin="normal"
+                      value={summary}
+                      onChange={(e) => setSummary(e.target.value)}
+                      InputLabelProps={{
+                        sx: {
+                          color: theme.palette.text.primary,
+                          '&.Mui-focused': {
+                            color: theme.palette.secondary.main,
+                          },
+                        },
+                      }}
+                      InputProps={{
+                        sx: {
+                          color: theme.palette.text.primary,
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: theme.palette.text.secondary,
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: theme.palette.secondary.main,
+                          },
+                        },
+                      }}
+                    />
+                    <IconButton
+                      onClick={handleGenerateSummary}
+                      sx={{
+                        position: 'absolute',
+                        right: 8,
+                        bottom: 8,
+                      }}
+                    >
+                      <SummarizeIcon />
+                    </IconButton>
+                  </Box>
+                  <FormControl fullWidth variant="outlined" margin="normal">
+                    <InputLabel
+                      id="privacy-select-label"
+                      sx={{
+                        color: theme.palette.text.primary,
+                        '&.Mui-focused': {
+                          color: theme.palette.secondary.main,
+                        },
+                      }}
+                    >
+                      Privacy Settings
+                    </InputLabel>
+                    <Select
+                      labelId="privacy-select-label"
+                      id="privacy-select"
+                      value={privacy}
+                      onChange={handlePrivacyChange}
+                      label="Privacy Settings"
+                      sx={{
+                        color: theme.palette.text.primary,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.text.secondary,
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.secondary.main,
+                        },
+                        '& .MuiSelect-select': {
+                          backgroundColor: theme.palette.background.default,
+                        },
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backgroundColor: theme.palette.background.default,
+                            '& .MuiMenuItem-root': {
+                              '&:hover': {
+                                color: theme.palette.background.default,
+                                backgroundColor: theme.palette.secondary.main,
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value={ArticleStatus.Published}>
+                        Published
+                      </MenuItem>
+                      <MenuItem value={ArticleStatus.Archived}>
+                        Private
+                      </MenuItem>
+                    </Select>
+                    <FormHelperText
+                      sx={{ color: theme.palette.secondary.main }}
+                    >
+                      Article Privacy Selection
+                    </FormHelperText>
+                  </FormControl>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginTop: 2,
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        typography: 'caption', // 设置较小的字体大小
+                      }}
+                    >
+                      Save As Draft
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={handleSubmit}
+                      sx={{
+                        typography: 'caption', // 设置较小的字体大小
+                      }}
+                    >
+                      Publish
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="inherit"
+                      onClick={handlePreviewOpen}
+                      sx={{
+                        typography: 'caption', // 设置较小的字体大小
+                      }}
+                    >
+                      Preview
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            </Grid>
+          )}
+        </Grid>
       </Container>
+
       <Dialog
         open={previewOpen}
         onClose={handlePreviewClose}
@@ -410,6 +567,129 @@ const NewPost: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {isMobile && (
+        <>
+          <Fab
+            color="secondary"
+            aria-label="toc"
+            sx={{ position: 'fixed', bottom: 80, right: 16 }}
+            onClick={() => setTocOpen(true)}
+          >
+            <MenuBookIcon />
+          </Fab>
+          <Fab
+            color="secondary"
+            aria-label="settings"
+            sx={{ position: 'fixed', bottom: 16, right: 16 }}
+            onClick={() => setSettingsOpen(true)}
+          >
+            <SettingsIcon />
+          </Fab>
+          <Drawer
+            anchor="bottom"
+            open={tocOpen}
+            onClose={() => setTocOpen(false)}
+            sx={{
+              '& .MuiDrawer-paper': { padding: 2, borderRadius: '8px 8px 0 0' },
+            }}
+          >
+            <Typography variant="h6">目录</Typography>
+            <List>{renderHeadings(headings)}</List>
+          </Drawer>
+          <Drawer
+            anchor="bottom"
+            open={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            sx={{
+              '& .MuiDrawer-paper': { padding: 2, borderRadius: '8px 8px 0 0' },
+            }}
+          >
+            <Typography variant="h6">文章设置</Typography>
+            <Box component="form" noValidate autoComplete="off">
+              <TextField
+                fullWidth
+                label="文章标签"
+                variant="outlined"
+                margin="normal"
+                InputLabelProps={{
+                  style: { color: theme.palette.text.primary },
+                }}
+                InputProps={{ style: { color: theme.palette.text.primary } }}
+              />
+              <TextField
+                fullWidth
+                label="文章封面"
+                variant="outlined"
+                margin="normal"
+                InputLabelProps={{
+                  style: { color: theme.palette.text.primary },
+                }}
+                InputProps={{ style: { color: theme.palette.text.primary } }}
+              />
+              <TextField
+                fullWidth
+                label="文章摘要"
+                variant="outlined"
+                multiline
+                rows={4}
+                margin="normal"
+                InputLabelProps={{
+                  style: { color: theme.palette.text.primary },
+                }}
+                InputProps={{ style: { color: theme.palette.text.primary } }}
+              />
+              <FormControl fullWidth variant="outlined" margin="normal">
+                <InputLabel
+                  id="privacy-select-label"
+                  style={{ color: theme.palette.text.primary }}
+                >
+                  隐私设置
+                </InputLabel>
+                <Select
+                  labelId="privacy-select-label"
+                  id="privacy-select"
+                  value={privacy}
+                  onChange={handlePrivacyChange}
+                  label="隐私设置"
+                  style={{ color: theme.palette.text.primary }}
+                >
+                  <MenuItem value="public">公开</MenuItem>
+                  <MenuItem value="private">私密</MenuItem>
+                </Select>
+                <FormHelperText style={{ color: theme.palette.secondary.main }}>
+                  选择文章的隐私设置
+                </FormHelperText>
+              </FormControl>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: 2,
+                }}
+              >
+                <Button variant="contained" color="primary">
+                  保存草稿
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleSubmit}
+                >
+                  发布文章
+                </Button>
+                <Button
+                  variant="contained"
+                  color="inherit"
+                  onClick={handlePreviewOpen}
+                >
+                  预览
+                </Button>
+              </Box>
+            </Box>
+          </Drawer>
+        </>
+      )}
     </Box>
   );
 };

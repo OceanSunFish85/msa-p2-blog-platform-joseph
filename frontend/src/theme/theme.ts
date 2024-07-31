@@ -15,7 +15,7 @@ export const lightTheme: ThemeOptions = {
     },
     text: {
       primary: '#000000', // 黑色
-      secondary: '#ffffff', // 灰色
+      secondary: '#e0e0e0', // 灰色
     },
     action: {
       selected: '#6B46C1', // 自定义选中颜色

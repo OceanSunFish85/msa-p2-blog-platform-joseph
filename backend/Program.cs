@@ -13,8 +13,12 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 加载配置文件
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
 // Add services
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
@@ -73,12 +77,18 @@ builder.Services.AddScoped<TokenService, TokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ArticleService>();
 builder.Services.AddScoped<FileStorageService>();
+builder.Services.AddScoped<AIService>();
 
 // Support string to enum conversions
 builder.Services.AddControllers().AddJsonOptions(opt =>
 {
     opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
+// 注册 AIService 并注入 IConfiguration 和 ILogger
+builder.Services.AddHttpClient<AIService>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+builder.Services.AddLogging();
 
 
 // Specify identity requirements
