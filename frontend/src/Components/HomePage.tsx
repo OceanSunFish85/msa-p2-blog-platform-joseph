@@ -1,5 +1,4 @@
-// src/pages/HomePage.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import {
@@ -22,10 +21,18 @@ import {
   Tab,
   Tabs,
   Toolbar,
+  Tooltip,
 } from '@mui/material';
 import headSection from '../assets/Head-section.png';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CommentIcon from '@mui/icons-material/Comment';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { useTheme } from '@mui/material/styles';
+import { useAppDispatch } from '../store/useAppDispatch';
+import { useAppSelector } from '../store/useAppSelecter';
+import { getArticlesThunk } from '../store/slices/article';
+import { ArticleSortOption } from '../Models/Article';
 
 const categories = [
   { value: '', label: '全部分类' },
@@ -34,58 +41,30 @@ const categories = [
   { value: 'management', label: '管理' },
 ];
 
-const mockArticles = [
-  {
-    id: 1,
-    title: 'Understanding React Hooks',
-    summary:
-      'A deep dive into React hooks and how they can be used to simplify your components.',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 2,
-    title: 'Introduction to TypeScript',
-    summary:
-      'Learn the basics of TypeScript and how it can help you write safer and more reliable code.',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 3,
-    title: 'Advanced CSS Techniques',
-    summary:
-      'Explore advanced CSS techniques for creating responsive and visually appealing web designs.',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 4,
-    title: 'Advanced CSS Techniques',
-    summary:
-      'Explore advanced CSS techniques for creating responsive and visually appealing web designs.',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 5,
-    title: 'Advanced CSS Techniques',
-    summary:
-      'Explore advanced CSS techniques for creating responsive and visually appealing web designs.',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 6,
-    title: 'Advanced CSS Techniques',
-    summary:
-      'Explore advanced CSS techniques for creating responsive and visually appealing web designs.',
-    image: 'https://via.placeholder.com/150',
-  },
-];
-
 const HomePage: React.FC = () => {
   const [tabValue, setTabValue] = useState<number>(0);
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(
     null
   );
   const [category, setCategory] = useState<string>('');
+  const dispatch = useAppDispatch();
+  const articles = useAppSelector((state) => state.article.articles);
   const theme = useTheme();
+
+  useEffect(() => {
+    dispatch(
+      getArticlesThunk({
+        pageNumber: 1,
+        pageSize: 10,
+        sortBy: ArticleSortOption.Date,
+        sortOrder: 'desc',
+      })
+    );
+  }, [dispatch]);
+
+  useEffect(() => {
+    console.log('articles:', articles);
+  }, [articles]);
 
   const handleTabOnChange = (
     event: React.ChangeEvent<{}>,
@@ -104,6 +83,12 @@ const HomePage: React.FC = () => {
 
   const handleCategoryChange = (event: SelectChangeEvent<string>) => {
     setCategory(event.target.value);
+  };
+
+  const truncateText = (text: string, maxLength: number): string => {
+    return text.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
   };
 
   return (
@@ -295,7 +280,7 @@ const HomePage: React.FC = () => {
                 </AppBar>
                 <Box sx={{ p: 2, height: '100%' }}>
                   <List>
-                    {mockArticles.map((article) => (
+                    {articles.map((article) => (
                       <ListItem key={article.id}>
                         <Card
                           sx={{
@@ -306,8 +291,8 @@ const HomePage: React.FC = () => {
                         >
                           <CardMedia
                             component="img"
-                            sx={{ width: 200 }}
-                            image={article.image}
+                            sx={{ width: 200, height: 150 }}
+                            image={article.cover}
                             alt={article.title}
                           />
                           <Box
@@ -318,18 +303,69 @@ const HomePage: React.FC = () => {
                             }}
                           >
                             <CardContent>
-                              <Typography variant="h6" component="div">
-                                {article.title}
-                              </Typography>
-                              <Typography variant="body2" color="text.primary">
-                                {article.summary}
-                              </Typography>
+                              <Tooltip title={article.title} placement="top">
+                                <Typography variant="h6" component="div">
+                                  {truncateText(article.title, 30)}
+                                </Typography>
+                              </Tooltip>
+                              <Tooltip title={article.summary} placement="top">
+                                <Typography
+                                  variant="body2"
+                                  color="text.primary"
+                                >
+                                  {truncateText(article.summary, 100)}
+                                </Typography>
+                              </Tooltip>
                             </CardContent>
                             <Box
                               display="flex"
-                              justifyContent="flex-end"
+                              justifyContent="space-between"
+                              alignItems="center"
                               padding="8px"
                             >
+                              <Box display="flex" alignItems="center">
+                                <VisibilityIcon
+                                  fontSize="small"
+                                  sx={{ marginRight: '4px' }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                  sx={{ marginRight: '16px' }}
+                                >
+                                  {article.views}
+                                </Typography>
+                                <CommentIcon
+                                  fontSize="small"
+                                  sx={{ marginRight: '4px' }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                  sx={{ marginRight: '16px' }}
+                                >
+                                  {article.commentsCount}
+                                </Typography>
+                                <ThumbUpIcon
+                                  fontSize="small"
+                                  sx={{ marginRight: '4px' }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                  sx={{ marginRight: '16px' }}
+                                >
+                                  {article.likes}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                >
+                                  {new Date(
+                                    article.createdAt
+                                  ).toLocaleDateString()}
+                                </Typography>
+                              </Box>
                               <CardActions>
                                 <Button size="small" color="secondary">
                                   Read More

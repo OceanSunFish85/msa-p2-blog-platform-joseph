@@ -18,7 +18,6 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
-import { LoginRequest } from '../Models/Auth';
 import { login } from '../store/slices/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -51,6 +50,7 @@ const LoginPage: React.FC = () => {
   ) => {
     event.preventDefault();
   };
+
   const handlePasswordFocus = () => {
     setIsPasswordFocused(true);
   };
@@ -59,10 +59,13 @@ const LoginPage: React.FC = () => {
     setIsPasswordFocused(false);
   };
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const credentials: LoginRequest = { Email: email, Password: password };
-    dispatch(login(credentials));
+  const handleSubmit = async (event: FormEvent) => {
+    try {
+      event.preventDefault();
+      await dispatch(login({ email, password })).unwrap();
+    } catch (error: any) {
+      console.error('Failed to login: ', error.message);
+    }
   };
 
   useEffect(() => {

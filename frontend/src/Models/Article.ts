@@ -20,6 +20,27 @@ export interface NewArticleRequest {
   Media?: ArticleMedia[];
 }
 
+export enum ArticleSortOption {
+  Comments = 'CommentsCount',
+  Views = 'Views',
+  Likes = 'Likes',
+  Date = 'CreatedAt',
+}
+
+export interface ArticleListResponse {
+  id: number;
+  title: string;
+  authorEmail: string;
+  summary: string;
+  cover: string;
+  categoryId: number;
+  status: string;
+  views: number;
+  commentsCount: number;
+  likes: number;
+  createdAt: string;
+}
+
 export interface SummarizedRequest {
   Inputs: string;
 }

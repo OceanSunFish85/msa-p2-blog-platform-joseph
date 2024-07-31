@@ -9,7 +9,7 @@ export interface UploadState {
   isLoading: boolean;
   error: string | null;
   avatar: string[];
-  cover: string[];
+  cover: string | null;
   articleMedia: string[];
 }
 
@@ -17,7 +17,7 @@ const initialState: UploadState = {
   isLoading: false,
   error: null,
   avatar: [],
-  cover: [],
+  cover: null,
   articleMedia: [],
 };
 
@@ -41,6 +41,7 @@ export const uploadCoverThunk: any = createAsyncThunk(
       const url = await uploadCover(file);
       return url;
     } catch (error: any) {
+      console.error('Thunk upload error:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -67,7 +68,7 @@ const uploadSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       state.avatar = [];
-      state.cover = [];
+      state.cover = null;
     },
   },
   extraReducers: (builder) => {
@@ -98,7 +99,7 @@ const uploadSlice = createSlice({
         uploadCoverThunk.fulfilled,
         (state, action: PayloadAction<string>) => {
           state.isLoading = false;
-          state.cover = [action.payload];
+          state.cover = action.payload;
         }
       )
       .addCase(
