@@ -14,8 +14,24 @@ export const uploadCover = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await axiosInstance.post('/upload/cover', formData);
-  return response.data.url;
+  try {
+    const response = await axiosInstance.post(
+      `${API_URL}upload/cover`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    console.log('Upload response:', response.data);
+
+    return response.data.url;
+  } catch (error: any) {
+    console.error('Upload error:', error);
+    throw new Error(error.response?.data?.message || 'Upload failed');
+  }
 };
 
 export const uploadArticleMedia = async (files: File[]): Promise<string[]> => {

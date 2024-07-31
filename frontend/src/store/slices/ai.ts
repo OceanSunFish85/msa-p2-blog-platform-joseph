@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { SummarizedResponse } from '../../Models/Article';
 import { generateSummary } from '../../Services/AIService';
 
 export interface AIState {

@@ -8,7 +8,7 @@ using backend.Entities;
 public class TokenService
 {
     // Specify how long until the token expires
-    private const int ExpirationMinutes = 30;
+    private const int ExpirationMinutes = 1440;
     private readonly ILogger<TokenService> _logger;
 
     public TokenService(ILogger<TokenService> logger)

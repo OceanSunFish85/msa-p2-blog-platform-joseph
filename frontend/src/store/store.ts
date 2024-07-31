@@ -4,6 +4,7 @@ import authSlice from './slices/auth';
 import userSlice from './slices/user';
 import uploadSlice from './slices/upload';
 import aiSlice from './slices/ai';
+import articleSlice from './slices/article';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     user: userSlice.reducer,
     upload: uploadSlice.reducer,
     ai: aiSlice.reducer,
+    article: articleSlice.reducer,
   },
 });
 

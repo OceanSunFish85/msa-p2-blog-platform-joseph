@@ -16,7 +16,7 @@ namespace backend.Services
             _logger = logger;
         }
 
-        public async Task<Article> CreateArticleAsync(NewArticleRequest newArticleRequest)
+        public async Task<int> CreateArticleAsync(NewArticleRequest newArticleRequest)
         {
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
@@ -70,7 +70,7 @@ namespace backend.Services
                     // 提交事务
                     await transaction.CommitAsync();
 
-                    return article;
+                    return article.Id;
                 }
                 catch (Exception ex)
                 {
@@ -83,7 +83,7 @@ namespace backend.Services
             }
         }
 
-        public async Task<ArticleResponse?> GetArticleByIdAsync(int id)
+        public async Task<ArticleDetailResponse?> GetArticleByIdAsync(int id)
         {
             // 获取文章及其内容
             var article = await _context.Articles
@@ -101,7 +101,7 @@ namespace backend.Services
                 .Where(m => m.ArticleId == id)
                 .ToListAsync();
 
-            return new ArticleResponse
+            return new ArticleDetailResponse
             {
                 Id = article.Id,
                 Title = article.Title,
@@ -122,6 +122,54 @@ namespace backend.Services
                     AltText = m.AltText
                 }).ToList()
             };
+        }
+
+        public List<ArticleListResponse> GetArticles(int pageNumber, int pageSize, string sortBy, string sortOrder)
+        {
+            var query = from article in _context.Articles
+                        join content in _context.ArticleContents
+                        on article.ContentId equals content.Id
+                        select new { article, content.HtmlContent };
+
+            // Apply sorting
+            switch (sortBy)
+            {
+                case ArticleSortOption.Comments:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.CommentsCount) : query.OrderByDescending(a => a.article.CommentsCount);
+                    break;
+                case ArticleSortOption.Views:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.Views) : query.OrderByDescending(a => a.article.Views);
+                    break;
+                case ArticleSortOption.Likes:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.Likes) : query.OrderByDescending(a => a.article.Likes);
+                    break;
+                case ArticleSortOption.Date:
+                default:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.CreatedAt) : query.OrderByDescending(a => a.article.CreatedAt);
+                    break;
+            }
+
+            // Apply pagination
+            var pagedArticles = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new ArticleListResponse
+                {
+                    Id = a.article.Id,
+                    Title = a.article.Title,
+                    AuthorEmail = a.article.AuthorEmail,
+                    Summary = a.article.Summary,
+                    Cover = a.article.Cover,
+                    CategoryId = a.article.CategoryId,
+                    Status = a.article.Status,
+                    Views = a.article.Views,
+                    CommentsCount = a.article.CommentsCount,
+                    Likes = a.article.Likes,
+                    CreatedAt = a.article.CreatedAt
+                })
+                .ToList();
+
+            return pagedArticles;
         }
 
     }

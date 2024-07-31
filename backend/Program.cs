@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // 加载配置文件
@@ -53,7 +52,6 @@ builder.Services.AddProblemDetails();
 builder.Services.AddApiVersioning();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
@@ -70,10 +68,10 @@ builder.Services.AddCors(options =>
 // Add DB Contexts
 // Move the connection string to user secrets for release
 builder.Services.AddDbContext<BlogWebDbContext>(opt =>
-    opt.UseSqlServer("Server=tcp:msap2softjc.database.windows.net,1433;Initial Catalog=msap2softdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register our TokenService dependency
-builder.Services.AddScoped<TokenService, TokenService>();
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ArticleService>();
 builder.Services.AddScoped<FileStorageService>();
@@ -90,7 +88,6 @@ builder.Services.AddHttpClient<AIService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddLogging();
 
-
 // Specify identity requirements
 // Must be added before .AddAuthentication otherwise a 404 is thrown on authorized endpoints
 builder.Services
@@ -106,39 +103,37 @@ builder.Services
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<BlogWebDbContext>();
 
-
 // These will eventually be moved to a secrets file, but for alpha development appsettings is fine
 var validIssuer = builder.Configuration.GetValue<string>("JwtTokenSettings:ValidIssuer");
 var validAudience = builder.Configuration.GetValue<string>("JwtTokenSettings:ValidAudience");
 var symmetricSecurityKey = builder.Configuration.GetValue<string>("JwtTokenSettings:SymmetricSecurityKey");
 
 builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.IncludeErrorDetails = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.IncludeErrorDetails = true;
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ClockSkew = TimeSpan.Zero,
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = validIssuer,
-            ValidAudience = validAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(symmetricSecurityKey)
-            ),
-        };
-    });
+        ClockSkew = TimeSpan.Zero,
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = validIssuer,
+        ValidAudience = validAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(symmetricSecurityKey)
+        ),
+    };
+});
 
 // Build the app
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

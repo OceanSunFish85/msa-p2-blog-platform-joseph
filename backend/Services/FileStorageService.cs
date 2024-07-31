@@ -33,7 +33,15 @@ namespace backend.Services
 
         public async Task<string> UploadCoverAsync(IFormFile file)
         {
-            return await SaveFileAsync(file, _coverPath);
+            var filePath = Path.Combine(_coverPath, $"{Guid.NewGuid()}_{file.FileName}");
+            Directory.CreateDirectory(_coverPath);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return $"{_baseUrl}/uploads/cover/{Path.GetFileName(filePath)}"; // 返回包含 base URL 的路径
         }
 
         public async Task<List<string>> UploadArticleMediaAsync(List<IFormFile> files)

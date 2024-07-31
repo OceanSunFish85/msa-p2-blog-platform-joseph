@@ -26,5 +26,11 @@
     <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" /> <!-- 显式包含wwwroot目录中的内容 -->
   </ItemGroup>
 
+  <ItemGroup>
+  <None Update="appsettings.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+
 
 </Project>

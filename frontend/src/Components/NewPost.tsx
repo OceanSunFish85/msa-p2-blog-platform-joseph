@@ -32,10 +32,14 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { useAppDispatch } from '../store/useAppDispatch';
-import { uploadArticleMediaThunk } from '../store/slices/upload';
+import {
+  uploadArticleMediaThunk,
+  uploadCoverThunk,
+} from '../store/slices/upload';
 import { ArticleStatus } from '../Models/enums/ArticleStatus';
 import { useTheme } from '@mui/material/styles';
 import { generateSummaryThunk } from '../store/slices/ai';
+import { createNewArticle } from '../store/slices/article';
 
 const NewPost: React.FC = () => {
   const theme = useTheme();
@@ -56,6 +60,10 @@ const NewPost: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [tocOpen, setTocOpen] = useState<boolean>(false);
   const [summary, setSummary] = React.useState('');
+
+  const [cover, setCover] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
   useEffect(() => {
     if (quillRef.current && !hasInitializedQuill.current) {
@@ -162,6 +170,31 @@ const NewPost: React.FC = () => {
     setPreviewOpen(false);
   };
 
+  const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file && file.size > MAX_FILE_SIZE) {
+      alert('File size exceeds 2MB');
+      return;
+    }
+
+    if (file) {
+      setCover(file); // Save the file temporarily
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleChangeCoverClick = () => {
+    const inputElement = document.getElementById(
+      'upload-button'
+    ) as HTMLInputElement;
+    inputElement.click();
+  };
+
   const dataURLToBlob = (dataURL: string): Blob => {
     const arr = dataURL.split(',');
     const mimeMatch = arr[0].match(/:(.*?);/);
@@ -244,6 +277,31 @@ const NewPost: React.FC = () => {
         const newDelta = replaceImagesInDelta(delta, mediaUrls.urls);
         console.log('New Delta format:', newDelta);
         editorRef.current.setContents(newDelta);
+
+        // Convert delta to HTML
+        const quill = new Quill(document.createElement('div'));
+        quill.setContents(newDelta);
+        const htmlContent = quill.root.innerHTML;
+
+        // Upload cover image
+
+        const coverUrl = await dispatch(uploadCoverThunk(cover)).unwrap();
+        console.log('Uploaded cover URL:', coverUrl);
+
+        // Collect article information
+        const newArticleRequest = {
+          title: title, // Assuming titleInputRef is a ref to the title input element
+          summary: summary, // Assuming summaryInputRef is a ref to the summary input element
+          cover: coverUrl,
+          status: privacy, // Assuming privacySettingRef is a ref to the privacy setting input element
+          htmlContent: htmlContent,
+        };
+
+        console.log('New Article Request:', newArticleRequest);
+        const newArticleId = await dispatch(
+          createNewArticle(newArticleRequest)
+        ).unwrap();
+        console.log('New article ID:', newArticleId);
       } catch (error) {
         console.error('Failed to upload media:', error);
       }
@@ -292,6 +350,7 @@ const NewPost: React.FC = () => {
             <TextField
               fullWidth
               label="Title"
+              required
               variant="outlined"
               margin="normal"
               value={title}
@@ -369,35 +428,80 @@ const NewPost: React.FC = () => {
                       },
                     }}
                   /> */}
-                  <TextField
-                    fullWidth
-                    label="文章封面"
-                    variant="outlined"
-                    margin="normal"
-                    InputLabelProps={{
-                      sx: {
-                        color: theme.palette.text.primary,
-                        '&.Mui-focused': {
-                          color: theme.palette.secondary.main,
-                        },
+                  <Box
+                    onClick={handleChangeCoverClick}
+                    sx={{
+                      border: '2px dashed',
+                      borderColor: 'secondary.main',
+                      borderRadius: 1,
+                      p: 2,
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      height: '200px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'transparent',
+                      '&:hover #upload-button-label': {
+                        display: 'block',
                       },
                     }}
-                    InputProps={{
-                      sx: {
-                        color: theme.palette.text.primary,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: theme.palette.text.secondary,
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: theme.palette.secondary.main,
-                        },
-                      },
-                    }}
-                  />
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      id="upload-button"
+                      onChange={handleCoverChange}
+                    />
+                    <label
+                      htmlFor="upload-button"
+                      id="upload-button-label"
+                      style={{
+                        display: 'none',
+                        position: 'absolute',
+                        zIndex: 2,
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      <Button variant="contained" component="span">
+                        {coverPreview ? 'Change Cover' : 'Upload Cover'}
+                      </Button>
+                    </label>
+                    {coverPreview ? (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                          zIndex: 1,
+                        }}
+                      >
+                        <img
+                          src={coverPreview}
+                          alt="Cover Preview"
+                          style={{ maxWidth: '100%', height: 'auto' }}
+                        />
+                      </Box>
+                    ) : (
+                      <Typography variant="h6" color="textSecondary">
+                        Upload Cover
+                      </Typography>
+                    )}
+                  </Box>
                   <Box position="relative">
                     <TextField
                       fullWidth
-                      label="文章摘要"
+                      label="Summary"
                       variant="outlined"
                       multiline
                       rows={4}
