@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using backend.Data;
 using backend.Entities;
+using backend.Hubs;
 using backend.Models;
 using backend.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 加载配置文件
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
+builder.Services.AddSignalR();
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
@@ -77,6 +80,8 @@ builder.Services.AddScoped<ArticleService>();
 builder.Services.AddScoped<FileStorageService>();
 builder.Services.AddScoped<AIService>();
 builder.Services.AddScoped<FavoriteService>();
+builder.Services.AddScoped<MessageService>();
+builder.Services.AddScoped<ChatService>();
 
 // Support string to enum conversions
 builder.Services.AddControllers().AddJsonOptions(opt =>
@@ -131,7 +136,23 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(symmetricSecurityKey)
         ),
     };
-});
+    options.Events = new JwtBearerEvents
+    {
+        // OnMessage Event is used to authenticate SignalR connections
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/chatHub")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+}
+);
 
 // Build the app
 var app = builder.Build();
@@ -160,5 +181,27 @@ app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+
+
+// app.UseWebSockets();
 app.MapControllers();
+
+// // 使用 app.MapGet 处理 WebSocket 请求
+// app.MapGet("/ws", async (HttpContext context, ChatService chatService) =>
+// {
+//     if (context.WebSockets.IsWebSocketRequest)
+//     {
+//         var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+//         await chatService.HandleWebSocketConnection(webSocket);
+//     }
+//     else
+//     {
+//         context.Response.StatusCode = 400;
+//         await context.Response.WriteAsync("WebSocket connection expected.");
+//     }
+// });
+
+app.MapHub<ChatHub>("/chatHub");
+
 app.Run();

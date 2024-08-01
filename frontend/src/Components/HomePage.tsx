@@ -40,6 +40,7 @@ import {
 } from '../store/slices/article';
 import { ArticleSortOption } from '../Models/Article';
 import { useNavigate } from 'react-router-dom';
+import PublicChatRoom from './PublicChatRoom';
 
 const categories = [
   { value: '', label: '全部分类' },
@@ -211,57 +212,6 @@ const HomePage: React.FC = () => {
                       <Tab label="全部" />
                       <Tab label="关注" />
                     </Tabs>
-                    {/* <Select
-                      value={category}
-                      onChange={handleSortOrderClick}
-                      displayEmpty
-                      inputProps={{ 'aria-label': '分类' }}
-                      sx={{
-                        ml: 2,
-                        '& .MuiSelect-select': {
-                          padding: '8px 32px 8px 8px',
-                          backgroundColor: theme.palette.background.default,
-                          borderRadius: theme.shape.borderRadius,
-                          '&:focus': {
-                            backgroundColor: theme.palette.background.default,
-                          },
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          border: 'none',
-                        },
-                        '& .MuiSvgIcon-root': {
-                          color: theme.palette.text.primary,
-                        },
-                      }}
-                      variant="outlined"
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            bgcolor: theme.palette.background.default,
-                            '& .MuiMenuItem-root': {
-                              '&:hover': {
-                                bgcolor: theme.palette.action.hover,
-                                color: theme.palette.text.secondary, // 悬停时字体颜色变成次要颜色
-                              },
-                              '&.Mui-selected': {
-                                bgcolor: theme.palette.action.selected,
-                                color: theme.palette.text.secondary, // 选中项的字体颜色变成次要颜色
-                                '&:hover': {
-                                  bgcolor: theme.palette.action.selected,
-                                  color: theme.palette.text.secondary, // 悬停时保持选中项的字体颜色为次要颜色
-                                },
-                              },
-                            },
-                          },
-                        },
-                      }}
-                    >
-                      {categories.map((cat) => (
-                        <MenuItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </MenuItem>
-                      ))}
-                    </Select> */}
                     <IconButton color="inherit" onClick={handleSortOrderClick}>
                       {sortOrder === 'asc' ? (
                         <ArrowUpward />
@@ -452,10 +402,10 @@ const HomePage: React.FC = () => {
           <Divider orientation="vertical" flexItem />
 
           {/* 第二列 */}
-          <Grid item xs={3} sx={{ textAlign: 'center' }} marginLeft={6}>
-            <Typography variant="h2" gutterBottom>
-              这片区域我还不知道放置什么内容
-            </Typography>
+          <Grid item xs={3} sx={{ textAlign: 'center' }}>
+            <Box flexGrow={1} width={430}>
+              <PublicChatRoom />
+            </Box>
           </Grid>
         </Grid>
       </Container>
