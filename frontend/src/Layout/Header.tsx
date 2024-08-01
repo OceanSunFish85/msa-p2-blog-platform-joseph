@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import InputBase from '@mui/material/InputBase';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { styled, alpha } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import AddIcon from '@mui/icons-material/Add';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -30,53 +30,7 @@ import { RootState } from '../store/store';
 import { useAppDispatch } from '../store/useAppDispatch';
 import { logout } from '../store/slices/auth';
 import { toggleTheme } from '../store/slices/global';
-
-// 自定义搜索框样式
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: '50px',
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(3),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-  border: `1px solid ${theme.palette.secondary.main}`,
-}));
-
-// 搜索图标容器样式
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: theme.palette.secondary.main,
-}));
-
-// 输入框样式
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-    '&::placeholder': {
-      color: theme.palette.primary.main,
-    },
-  },
-}));
+import { setSearchQuery } from '../store/slices/search';
 
 const Header: React.FC = () => {
   const theme = useTheme();
@@ -92,6 +46,8 @@ const Header: React.FC = () => {
     (state: RootState) => state.auth.isAuthenticated
   );
   const muiTheme = useAppSelector((state: RootState) => state.global.theme);
+
+  const [searchInput, setSearchInput] = useState('');
 
   const handleNewPostClick = () => {
     navigate('/newPost');
@@ -113,10 +69,19 @@ const Header: React.FC = () => {
     navigate('/account');
     setAnchorEl(null);
   };
+
   const handleUserLogout = () => {
     dispatch(logout());
     setAnchorEl(null);
     navigate('/login');
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(event.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    dispatch(setSearchQuery(searchInput));
   };
 
   const toggleDrawer =
@@ -255,15 +220,45 @@ const Header: React.FC = () => {
               </Box>
             </Grid>
             <Grid item xs={4}>
-              <Search>
-                <SearchIconWrapper>
-                  <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
+              <Box flexGrow={1} textAlign="center">
+                <TextField
                   placeholder="Search…"
-                  inputProps={{ 'aria-label': 'search' }}
+                  variant="outlined"
+                  size="small"
+                  onChange={handleSearchChange}
+                  InputProps={{
+                    sx: {
+                      borderRadius: 5, // 设置搜索栏左右圆形
+                    },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          color="secondary"
+                          onClick={handleSearchSubmit}
+                        >
+                          <SearchIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    width: '80%',
+                    bgcolor: 'background.default',
+                    borderRadius: 1,
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: theme.palette.secondary.main,
+                      },
+                      '&:hover fieldset': {
+                        borderColor: theme.palette.secondary.dark,
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: theme.palette.secondary.main,
+                      },
+                    },
+                  }}
                 />
-              </Search>
+              </Box>
             </Grid>
             <Grid item xs={4}>
               <Box
@@ -274,19 +269,6 @@ const Header: React.FC = () => {
               >
                 {isAuthenticated ? (
                   <>
-                    {/* <Link
-                      to="/account"
-                      style={{
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        borderBottom:
-                          location.pathname === '/account'
-                            ? `2px solid ${theme.palette.secondary.main}`
-                            : 'none',
-                      }}
-                    >
-                      <Button sx={{ color: 'inherit' }}>Account</Button>
-                    </Link> */}
                     <IconButton onClick={handleToggleTheme} color="inherit">
                       {muiTheme === 'light' ? (
                         <Brightness4Icon />

@@ -114,6 +114,7 @@ namespace backend.Services
                 Views = article.Views,
                 CommentsCount = article.CommentsCount,
                 Likes = article.Likes,
+                CreatedAt = article.CreatedAt,
                 Media = articleMedia.Select(m => new ArticleMediaDto
                 {
                     Id = m.Id,
@@ -126,9 +127,21 @@ namespace backend.Services
 
         public List<ArticleListResponse> GetArticles(int pageNumber, int pageSize, string sortBy, string sortOrder)
         {
+            var validSortOptions = new List<string> { ArticleSortOption.Comments, ArticleSortOption.Views, ArticleSortOption.Likes, ArticleSortOption.Date };
+            if (!validSortOptions.Contains(sortBy))
+            {
+                throw new ArgumentException("Invalid sortBy option.");
+            }
+
+            if (sortOrder.ToLower() != "asc" && sortOrder.ToLower() != "desc")
+            {
+                throw new ArgumentException("Invalid sortOrder option.");
+            }
+
             var query = from article in _context.Articles
                         join content in _context.ArticleContents
                         on article.ContentId equals content.Id
+                        where article.Status == ArticleStatus.Published // Add filter for Published status
                         select new { article, content.HtmlContent };
 
             // Apply sorting
