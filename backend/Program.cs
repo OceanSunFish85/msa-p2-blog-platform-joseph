@@ -76,6 +76,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ArticleService>();
 builder.Services.AddScoped<FileStorageService>();
 builder.Services.AddScoped<AIService>();
+builder.Services.AddScoped<FavoriteService>();
 
 // Support string to enum conversions
 builder.Services.AddControllers().AddJsonOptions(opt =>

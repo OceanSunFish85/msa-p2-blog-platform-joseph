@@ -18,6 +18,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Skeleton,
   Tab,
   Tabs,
   Toolbar,
@@ -28,11 +29,17 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CommentIcon from '@mui/icons-material/Comment';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ArrowUpward from '@mui/icons-material/ArrowUpward';
+import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import { useTheme } from '@mui/material/styles';
 import { useAppDispatch } from '../store/useAppDispatch';
 import { useAppSelector } from '../store/useAppSelecter';
-import { getArticlesThunk } from '../store/slices/article';
+import {
+  getArticlesThunk,
+  setSelectedArticleId,
+} from '../store/slices/article';
 import { ArticleSortOption } from '../Models/Article';
+import { useNavigate } from 'react-router-dom';
 
 const categories = [
   { value: '', label: '全部分类' },
@@ -50,21 +57,22 @@ const HomePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const articles = useAppSelector((state) => state.article.articles);
   const theme = useTheme();
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortOption, setSortOption] = useState<ArticleSortOption>(
+    ArticleSortOption.Date
+  );
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(
       getArticlesThunk({
         pageNumber: 1,
         pageSize: 10,
-        sortBy: ArticleSortOption.Date,
-        sortOrder: 'desc',
+        sortBy: sortOption,
+        sortOrder: sortOrder,
       })
     );
-  }, [dispatch]);
-
-  useEffect(() => {
-    console.log('articles:', articles);
-  }, [articles]);
+  }, [sortOption, sortOrder, dispatch]);
 
   const handleTabOnChange = (
     event: React.ChangeEvent<{}>,
@@ -73,16 +81,27 @@ const HomePage: React.FC = () => {
     setTabValue(newValue);
   };
 
+  const handleArticleClick = (id: number) => {
+    dispatch(setSelectedArticleId(id));
+    console.log(`Selected Article ID: ${id}`);
+    navigate(`/detail`);
+  };
+
+  const handleSortOptionClick = (option: ArticleSortOption) => {
+    setSortOption(option);
+    handleFilterClose();
+  };
+
+  const handleSortOrderClick = () => {
+    setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+  };
+
   const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
     setFilterAnchorEl(event.currentTarget);
   };
 
   const handleFilterClose = () => {
     setFilterAnchorEl(null);
-  };
-
-  const handleCategoryChange = (event: SelectChangeEvent<string>) => {
-    setCategory(event.target.value);
   };
 
   const truncateText = (text: string, maxLength: number): string => {
@@ -192,9 +211,9 @@ const HomePage: React.FC = () => {
                       <Tab label="全部" />
                       <Tab label="关注" />
                     </Tabs>
-                    <Select
+                    {/* <Select
                       value={category}
-                      onChange={handleCategoryChange}
+                      onChange={handleSortOrderClick}
                       displayEmpty
                       inputProps={{ 'aria-label': '分类' }}
                       sx={{
@@ -242,7 +261,14 @@ const HomePage: React.FC = () => {
                           {cat.label}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </Select> */}
+                    <IconButton color="inherit" onClick={handleSortOrderClick}>
+                      {sortOrder === 'asc' ? (
+                        <ArrowUpward />
+                      ) : (
+                        <ArrowDownward />
+                      )}
+                    </IconButton>
                     <IconButton color="inherit" onClick={handleFilterClick}>
                       <FilterListIcon />
                     </IconButton>
@@ -257,22 +283,45 @@ const HomePage: React.FC = () => {
                         '& .MuiMenuItem-root': {
                           '&:hover': {
                             bgcolor: theme.palette.action.hover,
-                            color: theme.palette.text.secondary, // 悬停时字体颜色变成次要颜色
+                            color: theme.palette.text.secondary,
                           },
                           '&.Mui-selected': {
                             bgcolor: theme.palette.action.selected,
-                            color: theme.palette.text.secondary, // 选中项的字体颜色变成次要颜色
+                            color: theme.palette.text.secondary,
                             '&:hover': {
                               bgcolor: theme.palette.action.selected,
-                              color: theme.palette.text.secondary, // 悬停时保持选中项的字体颜色为次要颜色
+                              color: theme.palette.text.secondary,
                             },
                           },
                         },
                       }}
                     >
-                      <MenuItem onClick={handleFilterClose}>按评论</MenuItem>
-                      <MenuItem onClick={handleFilterClose}>按阅读量</MenuItem>
-                      <MenuItem onClick={handleFilterClose}>
+                      <MenuItem
+                        onClick={() =>
+                          handleSortOptionClick(ArticleSortOption.Comments)
+                        }
+                      >
+                        按评论
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          handleSortOptionClick(ArticleSortOption.Views)
+                        }
+                      >
+                        按阅读量
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          handleSortOptionClick(ArticleSortOption.Likes)
+                        }
+                      >
+                        按喜欢数
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          handleSortOptionClick(ArticleSortOption.Date)
+                        }
+                      >
                         按发布时间
                       </MenuItem>
                     </Menu>
@@ -280,102 +329,120 @@ const HomePage: React.FC = () => {
                 </AppBar>
                 <Box sx={{ p: 2, height: '100%' }}>
                   <List>
-                    {articles.map((article) => (
-                      <ListItem key={article.id}>
-                        <Card
-                          sx={{
-                            display: 'flex',
-                            width: '100%',
-                            backgroundColor: theme.palette.background.default,
-                          }}
-                        >
-                          <CardMedia
-                            component="img"
-                            sx={{ width: 200, height: 150 }}
-                            image={article.cover}
-                            alt={article.title}
-                          />
-                          <Box
+                    {articles.map((article) =>
+                      article ? (
+                        <ListItem key={article.id}>
+                          <Card
                             sx={{
                               display: 'flex',
-                              flexDirection: 'column',
                               width: '100%',
+                              backgroundColor: theme.palette.background.default,
                             }}
                           >
-                            <CardContent>
-                              <Tooltip title={article.title} placement="top">
-                                <Typography variant="h6" component="div">
-                                  {truncateText(article.title, 30)}
-                                </Typography>
-                              </Tooltip>
-                              <Tooltip title={article.summary} placement="top">
-                                <Typography
-                                  variant="body2"
-                                  color="text.primary"
-                                >
-                                  {truncateText(article.summary, 100)}
-                                </Typography>
-                              </Tooltip>
-                            </CardContent>
+                            <CardMedia
+                              component="img"
+                              sx={{
+                                width: 200,
+                                height: 166,
+                                cursor: 'pointer',
+                              }}
+                              image={article.cover}
+                              alt={article.title}
+                              onClick={() => handleArticleClick(article.id)}
+                            />
                             <Box
-                              display="flex"
-                              justifyContent="space-between"
-                              alignItems="center"
-                              padding="8px"
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                width: '100%',
+                              }}
                             >
-                              <Box display="flex" alignItems="center">
-                                <VisibilityIcon
-                                  fontSize="small"
-                                  sx={{ marginRight: '4px' }}
-                                />
-                                <Typography
-                                  variant="body2"
-                                  color="secondary.main"
-                                  sx={{ marginRight: '16px' }}
+                              <CardContent>
+                                <Tooltip title={article.title} placement="top">
+                                  <Typography variant="h6" component="div">
+                                    {truncateText(article.title, 30)}
+                                  </Typography>
+                                </Tooltip>
+                                <Tooltip
+                                  title={article.summary}
+                                  placement="top"
                                 >
-                                  {article.views}
-                                </Typography>
-                                <CommentIcon
-                                  fontSize="small"
-                                  sx={{ marginRight: '4px' }}
-                                />
-                                <Typography
-                                  variant="body2"
-                                  color="secondary.main"
-                                  sx={{ marginRight: '16px' }}
-                                >
-                                  {article.commentsCount}
-                                </Typography>
-                                <ThumbUpIcon
-                                  fontSize="small"
-                                  sx={{ marginRight: '4px' }}
-                                />
-                                <Typography
-                                  variant="body2"
-                                  color="secondary.main"
-                                  sx={{ marginRight: '16px' }}
-                                >
-                                  {article.likes}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="secondary.main"
-                                >
-                                  {new Date(
-                                    article.createdAt
-                                  ).toLocaleDateString()}
-                                </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.primary"
+                                  >
+                                    {truncateText(article.summary, 100)}
+                                  </Typography>
+                                </Tooltip>
+                              </CardContent>
+                              <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                padding="8px"
+                              >
+                                <Box display="flex" alignItems="center">
+                                  <VisibilityIcon
+                                    fontSize="small"
+                                    sx={{ marginRight: '4px' }}
+                                  />
+                                  <Typography
+                                    variant="body2"
+                                    color="secondary.main"
+                                    sx={{ marginRight: '16px' }}
+                                  >
+                                    {article.views}
+                                  </Typography>
+                                  <CommentIcon
+                                    fontSize="small"
+                                    sx={{ marginRight: '4px' }}
+                                  />
+                                  <Typography
+                                    variant="body2"
+                                    color="secondary.main"
+                                    sx={{ marginRight: '16px' }}
+                                  >
+                                    {article.commentsCount}
+                                  </Typography>
+                                  <ThumbUpIcon
+                                    fontSize="small"
+                                    sx={{ marginRight: '4px' }}
+                                  />
+                                  <Typography
+                                    variant="body2"
+                                    color="secondary.main"
+                                    sx={{ marginRight: '16px' }}
+                                  >
+                                    {article.likes}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="secondary.main"
+                                  >
+                                    {new Date(
+                                      article.createdAt
+                                    ).toLocaleDateString()}
+                                  </Typography>
+                                </Box>
+                                <CardActions>
+                                  <Button
+                                    size="small"
+                                    color="secondary"
+                                    onClick={() =>
+                                      handleArticleClick(article.id)
+                                    }
+                                  >
+                                    Read More
+                                  </Button>
+                                </CardActions>
                               </Box>
-                              <CardActions>
-                                <Button size="small" color="secondary">
-                                  Read More
-                                </Button>
-                              </CardActions>
                             </Box>
-                          </Box>
-                        </Card>
-                      </ListItem>
-                    ))}
+                          </Card>
+                        </ListItem>
+                      ) : (
+                        <Skeleton variant="circular" width={210} height={118} />
+                      )
+                    )}
                   </List>
                 </Box>
               </Grid>

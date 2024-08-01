@@ -1,18 +1,26 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { ArticleSortOption, NewArticleRequest } from '../../Models/Article';
-import { createArticle, getArticles } from '../../Services/ArticleService';
+import {
+  createArticle,
+  getArticleById,
+  getArticles,
+} from '../../Services/ArticleService';
 
 // 定义 slice 的初始状态
 export interface ArticleState {
   articles: any[];
+  detail: any;
   loading: boolean;
   error: string | null;
+  selectedId?: number | null;
 }
 
 const initialState: ArticleState = {
   articles: [],
+  detail: null,
   loading: false,
   error: null,
+  selectedId: null,
 };
 
 // 创建异步 thunk action
@@ -42,11 +50,28 @@ export const getArticlesThunk: any = createAsyncThunk(
   }
 );
 
+export const getArticleByIdThunk: any = createAsyncThunk(
+  'article/fetchArticleById',
+  async (id: number, thunkAPI) => {
+    try {
+      const response = await getArticleById(id);
+      return response;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 // 创建 slice
 const articleSlice = createSlice({
   name: 'articles',
   initialState,
-  reducers: {},
+  reducers: {
+    setSelectedArticleId: (state, action: PayloadAction<number>) => {
+      state.selectedId = action.payload;
+      localStorage.setItem('selectedArticleId', action.payload.toString());
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createNewArticle.pending, (state) => {
@@ -75,8 +100,22 @@ const articleSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch articles';
       });
+    builder
+      .addCase(getArticleByIdThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getArticleByIdThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.detail = action.payload;
+      })
+      .addCase(getArticleByIdThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
 // 导出 reducer
+export const { setSelectedArticleId } = articleSlice.actions;
 export default articleSlice;

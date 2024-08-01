@@ -41,6 +41,22 @@ export interface ArticleListResponse {
   createdAt: string;
 }
 
+export interface ArticleDetailResponse {
+  id: number;
+  title: string;
+  authorEmail: string;
+  summary: string;
+  cover: string;
+  categoryId?: number | null;
+  status: ArticleStatus;
+  views: number;
+  commentsCount: number;
+  likes: number;
+  createdAt: Date;
+  htmlContent: string;
+  media?: ArticleMedia[] | null;
+}
+
 export interface SummarizedRequest {
   Inputs: string;
 }

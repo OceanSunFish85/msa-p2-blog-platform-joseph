@@ -5,6 +5,8 @@ import userSlice from './slices/user';
 import uploadSlice from './slices/upload';
 import aiSlice from './slices/ai';
 import articleSlice from './slices/article';
+import favoriteSlice from './slices/favorite';
+import searchSlice from './slices/search';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +16,8 @@ export const store = configureStore({
     upload: uploadSlice.reducer,
     ai: aiSlice.reducer,
     article: articleSlice.reducer,
+    favorite: favoriteSlice.reducer,
+    search: searchSlice.reducer,
   },
 });
 

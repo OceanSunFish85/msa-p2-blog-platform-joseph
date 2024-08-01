@@ -1,6 +1,7 @@
 import axiosInstance from './utils/AxionInstance';
 import API_URL from '../Constants';
 import {
+  ArticleDetailResponse,
   ArticleListResponse,
   ArticleSortOption,
   NewArticleRequest,
@@ -37,16 +38,36 @@ interface GetArticlesParams {
 export const getArticles = async (
   params: GetArticlesParams
 ): Promise<ArticleListResponse[]> => {
-  const response = await axios.get<ArticleListResponse[]>(
-    `${API_URL}article/articles`,
-    {
-      params: {
-        pageNumber: params.pageNumber,
-        pageSize: params.pageSize,
-        sortBy: params.sortBy,
-        sortOrder: params.sortOrder,
-      },
-    }
-  );
-  return response.data;
+  try {
+    const response = await axios.get<ArticleListResponse[]>(
+      `${API_URL}article/articles`,
+      {
+        params: {
+          pageNumber: params.pageNumber,
+          pageSize: params.pageSize,
+          sortBy: params.sortBy,
+          sortOrder: params.sortOrder,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    throw error;
+  }
+};
+
+export const getArticleById = async (
+  id: number
+): Promise<ArticleDetailResponse> => {
+  try {
+    const response = await axios.get<ArticleDetailResponse>(
+      `${API_URL}article/${id}`
+    );
+    console.log('response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching article detail:', error);
+    throw error;
+  }
 };
