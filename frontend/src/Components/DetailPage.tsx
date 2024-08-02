@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardHeader,
   Container,
   Dialog,
   DialogActions,
@@ -40,7 +41,7 @@ import {
 } from '../store/slices/favorite';
 import { Link, useNavigate } from 'react-router-dom';
 import { incrementArticleViewCount } from '../Services/ArticleService';
-import { checkFavorite } from '../Services/FavoriteService';
+import ArticleComment from './ArticleComment';
 
 const DetailPage: React.FC = () => {
   const theme = useTheme();
@@ -188,8 +189,10 @@ const DetailPage: React.FC = () => {
                 padding: theme.spacing(2),
                 textAlign: 'center',
                 width: '100%',
+                bgcolor: theme.palette.background.default,
               }}
             >
+              <CardHeader title="Author Info" />
               <CardContent>
                 <Avatar
                   sx={{ width: 100, height: 100, margin: 'auto' }}
@@ -209,7 +212,12 @@ const DetailPage: React.FC = () => {
           {/* 中间列 - 文章主题 */}
           <Grid item xs={12} md={7}>
             <Box
-              sx={{ padding: theme.spacing(2), borderColor: 'secondary.main' }}
+              sx={{
+                padding: theme.spacing(2),
+                borderColor: theme.palette.background.default,
+                borderRadius: 1,
+                boxShadow: 3,
+              }}
             >
               {/* 文章标题 */}
               <Typography variant="h4" gutterBottom>
@@ -268,6 +276,9 @@ const DetailPage: React.FC = () => {
                 }}
               >
                 <div ref={quillRef} />
+              </Box>
+              <Box>
+                <ArticleComment />
               </Box>
             </Box>
           </Grid>

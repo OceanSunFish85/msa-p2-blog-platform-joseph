@@ -26,6 +26,7 @@ import {
   Fab,
   IconButton,
   InputAdornment,
+  Menu,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -64,6 +65,8 @@ const NewPost: React.FC = () => {
   const [cover, setCover] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (quillRef.current && !hasInitializedQuill.current) {
@@ -403,31 +406,6 @@ const NewPost: React.FC = () => {
               >
                 <Typography variant="h6">Article Setting</Typography>
                 <Box component="form" noValidate autoComplete="off">
-                  {/* <TextField
-                    fullWidth
-                    label="文章标签"
-                    variant="outlined"
-                    margin="normal"
-                    InputLabelProps={{
-                      sx: {
-                        color: theme.palette.text.primary,
-                        '&.Mui-focused': {
-                          color: theme.palette.secondary.main,
-                        },
-                      },
-                    }}
-                    InputProps={{
-                      sx: {
-                        color: theme.palette.text.primary,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: theme.palette.text.secondary,
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: theme.palette.secondary.main,
-                        },
-                      },
-                    }}
-                  /> */}
                   <Box
                     onClick={handleChangeCoverClick}
                     sx={{
@@ -534,11 +512,20 @@ const NewPost: React.FC = () => {
                         position: 'absolute',
                         right: 8,
                         bottom: 8,
+                        color: theme.palette.secondary.main,
                       }}
                     >
                       <SummarizeIcon />
                     </IconButton>
                   </Box>
+                  <FormHelperText
+                    sx={{
+                      color: theme.palette.secondary.main,
+                      textAlign: 'right',
+                    }}
+                  >
+                    Click on the icon to use the AI summary
+                  </FormHelperText>
                   <FormControl fullWidth variant="outlined" margin="normal">
                     <InputLabel
                       id="privacy-select-label"
@@ -589,9 +576,13 @@ const NewPost: React.FC = () => {
                       <MenuItem value={ArticleStatus.Archived}>
                         Private
                       </MenuItem>
+                      <MenuItem value={ArticleStatus.Draft}>Draft</MenuItem>
                     </Select>
                     <FormHelperText
-                      sx={{ color: theme.palette.secondary.main }}
+                      sx={{
+                        color: theme.palette.secondary.main,
+                        textAlign: 'right',
+                      }}
                     >
                       Article Privacy Selection
                     </FormHelperText>
@@ -603,15 +594,6 @@ const NewPost: React.FC = () => {
                       marginTop: 2,
                     }}
                   >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        typography: 'caption', // 设置较小的字体大小
-                      }}
-                    >
-                      Save As Draft
-                    </Button>
                     <Button
                       variant="contained"
                       color="secondary"

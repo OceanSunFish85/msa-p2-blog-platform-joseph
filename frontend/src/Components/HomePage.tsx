@@ -44,19 +44,12 @@ import PublicChatRoom from './PublicChatRoom';
 import { fetchUserProfile } from '../store/slices/user';
 import { incrementArticleViewCount } from '../Services/ArticleService';
 
-const categories = [
-  { value: '', label: '全部分类' },
-  { value: 'technology', label: '技术' },
-  { value: 'development', label: '开发' },
-  { value: 'management', label: '管理' },
-];
-
 const HomePage: React.FC = () => {
   const [tabValue, setTabValue] = useState<number>(0);
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(
     null
   );
-  const [category, setCategory] = useState<string>('');
+
   const dispatch = useAppDispatch();
   const articles = useAppSelector((state) => state.article.articles);
   const theme = useTheme();

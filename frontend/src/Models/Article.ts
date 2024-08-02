@@ -1,6 +1,15 @@
 import { ArticleStatus } from './enums/ArticleStatus';
 import { MediaType } from './enums/MediaType';
 
+export interface GetArticlesParams {
+  pageNumber: number;
+  pageSize: number;
+  sortBy: ArticleSortOption;
+  sortOrder: 'asc' | 'desc';
+  status?: ArticleStatus;
+  searchKey?: string;
+}
+
 export interface ArticleMedia {
   Id?: number;
   Type: MediaType;

@@ -1,5 +1,4 @@
-// src/pages/AccountPage.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppBar,
   Avatar,
@@ -23,53 +22,92 @@ import {
   ListItem,
   Menu,
   MenuItem,
+  Stack,
   Tab,
   Tabs,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ArrowUpward from '@mui/icons-material/ArrowUpward';
+import ArrowDownward from '@mui/icons-material/ArrowDownward';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CommentIcon from '@mui/icons-material/Comment';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import EditIcon from '@mui/icons-material/Edit';
+import PublicIcon from '@mui/icons-material/Public';
+import DeleteIcon from '@mui/icons-material/Delete';
+import LockIcon from '@mui/icons-material/Lock';
+import LabelIcon from '@mui/icons-material/Label';
 import { useAppDispatch } from '../store/useAppDispatch';
 import { useAppSelector } from '../store/useAppSelecter';
 import { RootState } from '../store/store';
 import { fetchUserProfile, updateUserInfoThunk } from '../store/slices/user';
 import { uploadAvatarThunk } from '../store/slices/upload';
-
-const mockArticles = [
-  {
-    id: 1,
-    title: 'Understanding React Hooks',
-    summary:
-      'A deep dive into React hooks and how they can be used to simplify your components.',
-    image: 'https://via.placeholder.com/150',
-    tags: ['React', 'Hooks'],
-    views: 150,
-    comments: 10,
-    date: '2023-01-01',
-  },
-  {
-    id: 2,
-    title: 'Introduction to TypeScript',
-    summary:
-      'Learn the basics of TypeScript and how it can help you write safer and more reliable code.',
-    image: 'https://via.placeholder.com/150',
-    tags: ['TypeScript', 'JavaScript'],
-    views: 200,
-    comments: 20,
-    date: '2023-02-01',
-  },
-  // Add more mock articles here
-];
+import { getUserArticlesThunk } from '../store/slices/article';
+import { ArticleStatus } from '../Models/enums/ArticleStatus';
+import { ArticleSortOption } from '../Models/Article';
 
 const AccountPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state: RootState) => state.user);
+  const userArticles = useAppSelector(
+    (state: RootState) => state.article.userArticles
+  );
   const [open, setOpen] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState<ArticleStatus>(
+    ArticleStatus.Published
+  );
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const userAvatar = localStorage.getItem('userAvatar');
+  const userBio = localStorage.getItem('userBio');
+  const userName = localStorage.getItem('username');
+
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortOption, setSortOption] = useState<ArticleSortOption>(
+    ArticleSortOption.Date
+  );
+
+  const [searchKey, setSearchKey] = useState('');
+  const [debouncedSearchKey, setDebouncedSearchKey] = useState(searchKey);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // 设置debouncedSearchKey，延迟请求
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    const id = setTimeout(() => {
+      setDebouncedSearchKey(searchKey);
+    }, 500); // 500ms延迟
+    setTimeoutId(id);
+  }, [searchKey]);
+
+  useEffect(() => {
+    dispatch(
+      getUserArticlesThunk({
+        searchKey: debouncedSearchKey || '',
+        status: tabValue,
+        pageNumber: 1,
+        pageSize: 10,
+        sortBy: sortOption,
+        sortOrder: sortOrder,
+      })
+    );
+  }, [dispatch, tabValue, sortOption, sortOrder, debouncedSearchKey]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKey(event.target.value);
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -80,7 +118,10 @@ const AccountPage: React.FC = () => {
     setSelectedFile(null);
   };
 
-  const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleTabChange = (
+    event: React.ChangeEvent<{}>,
+    newValue: ArticleStatus
+  ) => {
     setTabValue(newValue);
   };
 
@@ -121,6 +162,29 @@ const AccountPage: React.FC = () => {
     }
   };
 
+  const handleSortOptionClick = (option: ArticleSortOption) => {
+    setSortOption(option);
+    handleFilterClose();
+  };
+
+  const handleSortOrderClick = () => {
+    setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+  };
+
+  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
+    setFilterAnchorEl(event.currentTarget);
+  };
+
+  const handleFilterClose = () => {
+    setFilterAnchorEl(null);
+  };
+
+  const truncateText = (text: string, maxLength: number): string => {
+    return text.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
+  };
+
   return (
     <Box
       sx={{
@@ -145,91 +209,134 @@ const AccountPage: React.FC = () => {
                       alignItems: 'center',
                     }}
                   >
-                    {/* 头像 */}
-                    <Avatar
-                      sx={{ width: 100, height: 100, cursor: 'pointer' }}
-                      src={user?.avatar || 'https://via.placeholder.com/100'}
-                      alt="User Avatar"
-                      onClick={handleClickOpen}
-                    />
-                    <Dialog open={open} onClose={handleClose}>
-                      <DialogTitle>修改头像</DialogTitle>
-                      <DialogContent>
-                        <DialogContentText>
-                          请选择要上传的头像图片：
-                        </DialogContentText>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                        />
-                      </DialogContent>
-                      <DialogActions>
-                        <Button onClick={handleClose}>取消</Button>
-                        <Button onClick={handleUpload} color="primary">
-                          确认
-                        </Button>
-                      </DialogActions>
-                    </Dialog>
-                    {/* 个人信息 */}
-                    <Typography variant="h6" align="center" sx={{ mt: 2 }}>
-                      {user?.userName}
-                    </Typography>
-                    <Typography variant="body1" align="center">
-                      {user?.bio}
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {/* 操作按钮 */}
-                    <Button
-                      variant="contained"
+                    <Card
                       sx={{
-                        mb: 1,
-                        backgroundColor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
-                        '&:hover': {
-                          backgroundColor: theme.palette.action.hover,
-                          color: theme.palette.primary.main,
-                        },
+                        width: '80%',
+                        margin: 'auto',
+                        mt: 4,
+                        bgcolor: theme.palette.background.default,
                       }}
                     >
-                      编辑信息
-                    </Button>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        mb: 1,
-                        backgroundColor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
-                        '&:hover': {
-                          backgroundColor: theme.palette.action.hover,
-                          color: theme.palette.primary.main,
-                        },
-                      }}
-                    >
-                      修改密码
-                    </Button>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
-                        '&:hover': {
-                          backgroundColor: theme.palette.action.hover,
-                          color: theme.palette.primary.main,
-                        },
-                      }}
-                    >
-                      设置标签
-                    </Button>
+                      <CardContent>
+                        {/* 头像 */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            mb: 2,
+                          }}
+                        >
+                          <Avatar
+                            sx={{
+                              width: 100,
+                              height: 100,
+                              cursor: 'pointer',
+                              border: `2px solid ${theme.palette.background.paper}`,
+                            }}
+                            src={
+                              user?.avatar ||
+                              userAvatar ||
+                              'https://via.placeholder.com/100'
+                            }
+                            alt="User Avatar"
+                            onClick={handleClickOpen}
+                          />
+                        </Box>
+                        <Dialog open={open} onClose={handleClose}>
+                          <DialogTitle>修改头像</DialogTitle>
+                          <DialogContent>
+                            <DialogContentText>
+                              请选择要上传的头像图片：
+                            </DialogContentText>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileChange}
+                            />
+                          </DialogContent>
+                          <DialogActions>
+                            <Button onClick={handleClose}>取消</Button>
+                            <Button onClick={handleUpload} color="primary">
+                              确认
+                            </Button>
+                          </DialogActions>
+                        </Dialog>
+                        {/* 个人信息 */}
+                        <Typography variant="h6" align="center" sx={{ mt: 2 }}>
+                          {user?.userName || userName}
+                        </Typography>
+                        <Typography variant="body1" align="center">
+                          {user?.bio || userBio}
+                        </Typography>
+                      </CardContent>
+                      <Divider />
+                      <CardActions sx={{ justifyContent: 'center' }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2,
+                          }}
+                        >
+                          {/* 操作按钮 */}
+                          <Tooltip title="编辑信息" arrow>
+                            <IconButton
+                              sx={{
+                                boxShadow: 'none',
+                                backgroundColor: theme.palette.primary.main,
+                                color: theme.palette.primary.contrastText,
+                                '&:hover': {
+                                  backgroundColor: theme.palette.secondary.main,
+                                  color: theme.palette.background.default,
+                                },
+                                '&:not(:last-child)::after': {
+                                  marginLeft: 2,
+                                  marginRight: 2,
+                                  color: theme.palette.text.secondary,
+                                },
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="修改密码" arrow>
+                            <IconButton
+                              sx={{
+                                boxShadow: 'none',
+                                backgroundColor: theme.palette.primary.main,
+                                color: theme.palette.primary.contrastText,
+                                '&:hover': {
+                                  backgroundColor: theme.palette.secondary.main,
+                                  color: theme.palette.background.default,
+                                },
+                                '&:not(:last-child)::after': {
+                                  marginLeft: 2,
+                                  marginRight: 2,
+                                  color: theme.palette.text.secondary,
+                                },
+                              }}
+                            >
+                              <LockIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="设置标签" arrow>
+                            <IconButton
+                              sx={{
+                                boxShadow: 'none',
+                                backgroundColor: theme.palette.primary.main,
+                                color: theme.palette.primary.contrastText,
+                                '&:hover': {
+                                  backgroundColor: theme.palette.secondary.main,
+                                  color: theme.palette.background.default,
+                                },
+                              }}
+                            >
+                              <LabelIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </CardActions>
+                    </Card>
                   </Box>
                 </Grid>
               </Grid>
@@ -257,7 +364,7 @@ const AccountPage: React.FC = () => {
                     alignItems: 'center',
                     backgroundColor: theme.palette.background.default,
                     borderRadius: '50px', // 圆形
-                    border: `1px solid ${theme.palette.primary.main}`, // 边框颜色为 secondary
+                    border: `1px solid ${theme.palette.primary.main}`, // 边框颜色为 primary
                     padding: theme.spacing(0.5),
                     overflow: 'hidden', // 确保边框圆形
                     height: '36px',
@@ -266,6 +373,7 @@ const AccountPage: React.FC = () => {
                   <InputBase
                     placeholder="Search..."
                     inputProps={{ 'aria-label': 'search' }}
+                    onChange={handleSearchChange}
                     sx={{ marginLeft: theme.spacing(1), flex: 1 }}
                   />
                   <IconButton
@@ -285,30 +393,107 @@ const AccountPage: React.FC = () => {
                 sx={{ marginTop: theme.spacing(2), boxShadow: 'none' }}
                 color="primary"
               >
-                <Tabs
-                  value={tabValue}
-                  onChange={handleTabChange}
+                <Box
                   sx={{
-                    '& .MuiTabs-indicator': {
-                      backgroundColor: theme.palette.secondary.main, // 指示器颜色
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Tabs
+                    value={tabValue}
+                    onChange={handleTabChange}
+                    sx={{
+                      '& .MuiTabs-indicator': {
+                        backgroundColor: theme.palette.secondary.main, // 指示器颜色
+                      },
+                      '& .MuiTab-root': {
+                        color: 'inherit',
+                        '&.Mui-selected': {
+                          color: theme.palette.secondary.main, // 选中状态下的颜色
+                        },
+                      },
+                    }}
+                  >
+                    {Object.values(ArticleStatus).map((status) => (
+                      <Tab
+                        label={status === 'Archived' ? 'Private' : status}
+                        value={status}
+                        key={status}
+                      />
+                    ))}
+                  </Tabs>
+                  <Box>
+                    <IconButton color="inherit" onClick={handleSortOrderClick}>
+                      {sortOrder === 'asc' ? (
+                        <ArrowUpward />
+                      ) : (
+                        <ArrowDownward />
+                      )}
+                    </IconButton>
+                    <IconButton color="inherit" onClick={handleFilterClick}>
+                      <FilterListIcon />
+                    </IconButton>
+                  </Box>
+                </Box>
+                <Menu
+                  anchorEl={filterAnchorEl}
+                  open={Boolean(filterAnchorEl)}
+                  onClose={handleFilterClose}
+                  sx={{
+                    '& .MuiPaper-root': {
+                      bgcolor: theme.palette.background.default,
                     },
-                    '& .MuiTab-root': {
-                      color: 'inherit',
+                    '& .MuiMenuItem-root': {
+                      '&:hover': {
+                        bgcolor: theme.palette.action.hover,
+                        color: theme.palette.text.secondary,
+                      },
                       '&.Mui-selected': {
-                        color: theme.palette.secondary.main, // 选中状态下的颜色
+                        bgcolor: theme.palette.action.selected,
+                        color: theme.palette.text.secondary,
+                        '&:hover': {
+                          bgcolor: theme.palette.action.selected,
+                          color: theme.palette.text.secondary,
+                        },
                       },
                     },
                   }}
                 >
-                  <Tab label="我的文章" />
-                  <Tab label="我的收藏" />
-                </Tabs>
+                  <MenuItem
+                    onClick={() =>
+                      handleSortOptionClick(ArticleSortOption.Comments)
+                    }
+                  >
+                    按评论
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() =>
+                      handleSortOptionClick(ArticleSortOption.Views)
+                    }
+                  >
+                    按阅读量
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() =>
+                      handleSortOptionClick(ArticleSortOption.Likes)
+                    }
+                  >
+                    按喜欢数
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() =>
+                      handleSortOptionClick(ArticleSortOption.Date)
+                    }
+                  >
+                    按发布时间
+                  </MenuItem>
+                </Menu>
               </AppBar>
-
               {/* 文章列表 */}
               <List sx={{ marginTop: theme.spacing(2) }}>
-                {mockArticles.map((article) => (
-                  <ListItem key={article.id}>
+                {userArticles.map((userArticle) => (
+                  <ListItem key={userArticle.id}>
                     <Card
                       sx={{
                         display: 'flex',
@@ -319,8 +504,10 @@ const AccountPage: React.FC = () => {
                       <CardMedia
                         component="img"
                         sx={{ width: 150 }}
-                        image={article.image}
-                        alt={article.title}
+                        image={
+                          userArticle.cover || 'https://via.placeholder.com/150'
+                        }
+                        alt={userArticle.title}
                       />
                       <Box
                         sx={{
@@ -331,89 +518,96 @@ const AccountPage: React.FC = () => {
                       >
                         <CardContent>
                           <Typography component="div" variant="h6">
-                            {article.title}
+                            {truncateText(userArticle.title, 30)}
                           </Typography>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              gap: theme.spacing(1),
-                              flexWrap: 'wrap',
-                              mt: 1,
-                            }}
-                          >
-                            {article.tags.map((tag) => (
-                              <Typography
-                                key={tag}
-                                variant="body2"
-                                color="secondary"
-                              >
-                                {tag}
-                              </Typography>
-                            ))}
-                          </Box>
+
                           <Typography
                             variant="body2"
                             color="text.primary"
                             sx={{ mt: 1 }}
                           >
-                            {article.summary}
+                            {truncateText(userArticle.summary, 100)}
                           </Typography>
                         </CardContent>
-                        <CardActions
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            padding: theme.spacing(1),
-                          }}
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          padding="8px"
                         >
-                          <Box sx={{ display: 'flex', gap: theme.spacing(2) }}>
-                            <Typography variant="body2" color="text.primary">
-                              阅读量: {article.views}
+                          <Box display="flex" alignItems="center">
+                            <VisibilityIcon
+                              fontSize="small"
+                              sx={{ marginRight: '4px' }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="secondary.main"
+                              sx={{ marginRight: '16px' }}
+                            >
+                              {userArticle.views}
                             </Typography>
-                            <Typography variant="body2" color="text.primary">
-                              评论数: {article.comments}
+                            <CommentIcon
+                              fontSize="small"
+                              sx={{ marginRight: '4px' }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="secondary.main"
+                              sx={{ marginRight: '16px' }}
+                            >
+                              {userArticle.commentsCount}
                             </Typography>
-                            <Typography variant="body2" color="text.primary">
-                              上传日期: {article.date}
+                            <ThumbUpIcon
+                              fontSize="small"
+                              sx={{ marginRight: '4px' }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="secondary.main"
+                              sx={{ marginRight: '16px' }}
+                            >
+                              {userArticle.likes}
+                            </Typography>
+                            <Typography variant="body2" color="secondary.main">
+                              {new Date(
+                                userArticle.createdAt
+                              ).toLocaleDateString()}
                             </Typography>
                           </Box>
-                          <IconButton
-                            onClick={handleMenuClick}
-                            color="secondary"
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-                          <Menu
-                            anchorEl={menuAnchorEl}
-                            open={Boolean(menuAnchorEl)}
-                            onClose={handleMenuClose}
+                          <CardActions
                             sx={{
-                              '& .MuiPaper-root': {
-                                bgcolor: theme.palette.background.default,
-                              },
-                              '& .MuiMenuItem-root': {
-                                '&:hover': {
-                                  bgcolor: theme.palette.action.hover,
-                                  color: theme.palette.text.secondary, // 悬停时字体颜色变成次要颜色
-                                },
-                                '&.Mui-selected': {
-                                  bgcolor: theme.palette.action.selected,
-                                  color: theme.palette.text.secondary, // 选中项的字体颜色变成次要颜色
-                                  '&:hover': {
-                                    bgcolor: theme.palette.action.selected,
-                                    color: theme.palette.text.secondary, // 悬停时保持选中项的字体颜色为次要颜色
-                                  },
-                                },
-                              },
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              padding: theme.spacing(1),
                             }}
                           >
-                            <MenuItem onClick={handleMenuClose}>编辑</MenuItem>
-                            <MenuItem onClick={handleMenuClose}>
-                              设置公开
-                            </MenuItem>
-                            <MenuItem onClick={handleMenuClose}>删除</MenuItem>
-                          </Menu>
-                        </CardActions>
+                            <Tooltip title="编辑文章" arrow>
+                              <IconButton
+                                onClick={handleMenuClose}
+                                color="secondary"
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="设置状态" arrow>
+                              <IconButton
+                                onClick={handleMenuClose}
+                                color="secondary"
+                              >
+                                <PublicIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="删除" arrow>
+                              <IconButton
+                                onClick={handleMenuClose}
+                                color="secondary"
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </CardActions>
+                        </Box>
                       </Box>
                     </Card>
                   </ListItem>

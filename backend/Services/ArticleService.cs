@@ -246,6 +246,95 @@ namespace backend.Services
             await _context.SaveChangesAsync();
         }
 
+
+        public async Task IncrementCommentsCountAsync(int articleId)
+        {
+            var article = await _context.Articles.SingleOrDefaultAsync(a => a.Id == articleId);
+
+            if (article == null)
+            {
+                _logger.LogWarning($"Article with ID {articleId} not found");
+                throw new Exception("Article not found");
+            }
+
+            article.CommentsCount += 1;
+
+            _context.Articles.Update(article);
+            await _context.SaveChangesAsync();
+        }
+
+        public List<ArticleListResponse> GetUserArticles(
+            string userEmail,
+            ArticleStatus status,
+            string searchKey,
+            int pageNumber,
+            int pageSize,
+            string sortBy,
+            string sortOrder)
+        {
+            var validSortOptions = new List<string> { ArticleSortOption.Comments, ArticleSortOption.Views, ArticleSortOption.Likes, ArticleSortOption.Date };
+            if (!validSortOptions.Contains(sortBy))
+            {
+                throw new ArgumentException("Invalid sortBy option.");
+            }
+
+            if (sortOrder.ToLower() != "asc" && sortOrder.ToLower() != "desc")
+            {
+                throw new ArgumentException("Invalid sortOrder option.");
+            }
+
+            var query = from article in _context.Articles
+                        join content in _context.ArticleContents
+                        on article.ContentId equals content.Id
+                        where article.AuthorEmail == userEmail && article.Status == status
+                        select new { article, content.HtmlContent };
+
+            if (!string.IsNullOrEmpty(searchKey))
+            {
+                query = query.Where(a => a.article.Title.Contains(searchKey) || a.article.Summary.Contains(searchKey));
+            }
+
+            // Apply sorting
+            switch (sortBy)
+            {
+                case ArticleSortOption.Comments:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.CommentsCount) : query.OrderByDescending(a => a.article.CommentsCount);
+                    break;
+                case ArticleSortOption.Views:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.Views) : query.OrderByDescending(a => a.article.Views);
+                    break;
+                case ArticleSortOption.Likes:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.Likes) : query.OrderByDescending(a => a.article.Likes);
+                    break;
+                case ArticleSortOption.Date:
+                default:
+                    query = sortOrder.ToLower() == "asc" ? query.OrderBy(a => a.article.CreatedAt) : query.OrderByDescending(a => a.article.CreatedAt);
+                    break;
+            }
+
+            // Apply pagination
+            var pagedArticles = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new ArticleListResponse
+                {
+                    Id = a.article.Id,
+                    Title = a.article.Title,
+                    AuthorEmail = a.article.AuthorEmail,
+                    Summary = a.article.Summary,
+                    Cover = a.article.Cover,
+                    CategoryId = a.article.CategoryId,
+                    Status = a.article.Status,
+                    Views = a.article.Views,
+                    CommentsCount = a.article.CommentsCount,
+                    Likes = a.article.Likes,
+                    CreatedAt = a.article.CreatedAt
+                })
+                .ToList();
+
+            return pagedArticles;
+        }
+
     }
 
 }
