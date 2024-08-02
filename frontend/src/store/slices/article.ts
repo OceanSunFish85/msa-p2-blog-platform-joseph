@@ -4,9 +4,12 @@ import {
   ArticleSortOption,
   GetArticlesParams,
   NewArticleRequest,
+  UpdateArticleRequest,
 } from '../../Models/Article';
 import {
   createArticle,
+  deleteArticle,
+  editArticle,
   getArticleById,
   getArticles,
   getUserArticles,
@@ -47,6 +50,14 @@ export const createNewArticle: any = createAsyncThunk(
   }
 );
 
+export const updateArticleThunk: any = createAsyncThunk(
+  'articles/updateArticle',
+  async (params: { id: number; data: UpdateArticleRequest }) => {
+    const response = await editArticle(params.id, params.data);
+    return response;
+  }
+);
+
 export const getArticlesThunk: any = createAsyncThunk(
   'articles/getArticles',
   async (params: {
@@ -78,6 +89,14 @@ export const getArticleByIdThunk: any = createAsyncThunk(
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  }
+);
+
+export const deleteArticleThunk: any = createAsyncThunk(
+  'articles/deleteArticle',
+  async (id: number) => {
+    await deleteArticle(id);
+    return id;
   }
 );
 
@@ -167,6 +186,32 @@ const articleSlice = createSlice({
       .addCase(getAuthorInfoThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      });
+    builder
+      .addCase(updateArticleThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateArticleThunk.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateArticleThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update article';
+      });
+    builder
+      .addCase(deleteArticleThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteArticleThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        // 你可以在这里更新你的状态来删除文章
+        // 例如：state.articles = state.articles.filter(article => article.id !== action.payload);
+      })
+      .addCase(deleteArticleThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to delete article';
       });
   },
 });

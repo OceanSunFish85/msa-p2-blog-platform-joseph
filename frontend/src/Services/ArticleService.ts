@@ -6,6 +6,7 @@ import {
   ArticleSortOption,
   GetArticlesParams,
   NewArticleRequest,
+  UpdateArticleRequest,
 } from '../Models/Article';
 import axios from 'axios';
 
@@ -24,6 +25,45 @@ export const createArticle = async (newArticleRequest: NewArticleRequest) => {
       );
     } else {
       console.error('Unexpected error creating article:', error);
+    }
+    throw error;
+  }
+};
+// 编辑文章的服务
+export const editArticle = async (
+  id: number,
+  editArticleRequest: UpdateArticleRequest
+) => {
+  try {
+    const response = await axiosInstance.put(
+      `${API_URL}article/edit-article/${id}`,
+      editArticleRequest
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        'Axios error editing article:',
+        error.response?.data || error.message
+      );
+    } else {
+      console.error('Unexpected error editing article:', error);
+    }
+    throw error;
+  }
+};
+
+export const deleteArticle = async (id: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`${API_URL}article/delete-article/${id}`);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        'Axios error deleting article:',
+        error.response?.data || error.message
+      );
+    } else {
+      console.error('Unexpected error deleting article:', error);
     }
     throw error;
   }

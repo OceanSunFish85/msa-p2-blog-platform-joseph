@@ -36,6 +36,52 @@ public class ArticleController : ControllerBase
         return CreatedAtAction(nameof(GetArticleById), new { id = createdArticleId }, createdArticleId);
     }
 
+    [Authorize]
+    [HttpPut("edit-article/{id}")]
+    public async Task<IActionResult> EditArticle(int id, EditArticleRequest editArticleRequest)
+    {
+        // 从 JWT 令牌中获取用户的电子邮件地址
+        var userEmail = User.FindFirstValue(ClaimTypes.Email);
+        _logger.LogInformation("User Email from token: {UserEmail}", userEmail);
+
+        if (userEmail == null)
+        {
+            return Forbid();
+        }
+
+        var result = await _articleService.EditArticleAsync(id, editArticleRequest);
+
+        if (!result)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpDelete("delete-article/{id}")]
+    public async Task<IActionResult> DeleteArticle(int id)
+    {
+        var userEmail = User.FindFirstValue(ClaimTypes.Email);
+        _logger.LogInformation("User Email from token: {UserEmail}", userEmail);
+
+        if (userEmail == null)
+        {
+            return Forbid();
+        }
+
+        var result = await _articleService.DeleteArticleAsync(id, userEmail);
+
+        if (!result)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
+
     [HttpGet("{id}")]
     public async Task<ActionResult<Article>> GetArticleById(int id)
     {
