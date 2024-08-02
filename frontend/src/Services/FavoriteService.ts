@@ -25,14 +25,13 @@ export const removeFavorite = async (articleId: number, userEmail: string) => {
   }
 };
 
-export const checkFavorite = async (articleId: number, userEmail: string) => {
-  try {
-    const response = await axiosInstance.get(`${API_URL}favorites/check`, {
-      params: { articleId, userEmail },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error checking favorite:', error);
-    throw error;
-  }
+export const checkFavorite = async (
+  articleId: number,
+  userEmail: string
+): Promise<boolean> => {
+  const response = await axiosInstance.get(`${API_URL}favorites/check`, {
+    params: { articleId, userEmail },
+  });
+  console.log('Check favorite:', response.data.isFavorite);
+  return response.data.isFavorite;
 };

@@ -28,7 +28,15 @@ namespace backend.Services
 
         public async Task<string> UploadAvatarAsync(IFormFile file)
         {
-            return await SaveFileAsync(file, _avatarPath);
+            var filePath = Path.Combine(_avatarPath, $"{Guid.NewGuid()}_{file.FileName}");
+            Directory.CreateDirectory(_avatarPath);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return $"{_baseUrl}/uploads/avatar/{Path.GetFileName(filePath)}"; // 返回包含 base URL 的路径
         }
 
         public async Task<string> UploadCoverAsync(IFormFile file)

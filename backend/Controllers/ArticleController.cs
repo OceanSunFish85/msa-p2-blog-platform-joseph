@@ -58,4 +58,36 @@ public class ArticleController : ControllerBase
         var articles = _articleService.GetArticles(pageNumber, pageSize, sortBy, sortOrder);
         return Ok(articles);
     }
+
+    [HttpPost("increment-views/{articleId}")]
+    public async Task<IActionResult> IncrementViews(int articleId)
+    {
+        try
+        {
+            await _articleService.IncrementViewsAsync(articleId);
+            return Ok(new { Message = "Views incremented successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error incrementing views for article ID: {ArticleId}", articleId);
+            return StatusCode(500, new { Message = "An error occurred while incrementing views" });
+        }
+    }
+
+    [HttpPost("favorite/{articleId}")]
+    [Authorize]
+    public async Task<IActionResult> HandleFavorite(int articleId, [FromBody] int action)
+    {
+        try
+        {
+            await _articleService.HandleFavoritCount(articleId, action);
+
+            return Ok(new { Message = action == 1 ? "Article favorited successfully" : "Article unfavorited successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling favorite action for article ID: {ArticleId}", articleId);
+            return StatusCode(500, new { Message = "An error occurred while handling favorite action" });
+        }
+    }
 }

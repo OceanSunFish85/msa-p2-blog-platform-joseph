@@ -15,6 +15,7 @@ import {
   colors,
   Popover,
   InputAdornment,
+  Link,
 } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { MessageRequest, MessageResponse } from '../Models/Message';
@@ -37,7 +38,13 @@ const ChatComponent: React.FC = () => {
   const textFieldRef = useRef<HTMLInputElement>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
   useEffect(() => {
+    if (!token) {
+      setIsLoggedIn(false);
+      return;
+    }
     // 创建 SignalR 连接
     const newConnection = new HubConnectionBuilder()
       .withUrl('http://localhost:5078/chatHub', {
@@ -160,110 +167,167 @@ const ChatComponent: React.FC = () => {
         position: 'relative',
       }}
     >
-      <Typography variant="h4" gutterBottom>
-        Chat
-      </Typography>
-      <Box
-        ref={chatContainerRef}
-        onScroll={handleScroll}
-        sx={{
-          flex: 1,
-          overflowY: 'auto',
-          p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
-          position: 'relative',
-        }}
-      >
-        {messages.map((msg, index) => (
+      {isLoggedIn ? (
+        <>
+          <Typography variant="h4" gutterBottom>
+            Public Chat
+          </Typography>
           <Box
-            key={index}
+            ref={chatContainerRef}
+            onScroll={handleScroll}
             sx={{
+              flex: 1,
+              overflowY: 'auto',
+              p: 2,
               display: 'flex',
-              flexDirection: msg.userName === userName ? 'row-reverse' : 'row',
-              alignItems: 'flex-start',
+              flexDirection: 'column',
               gap: 1,
+              position: 'relative',
             }}
           >
-            <Paper
+            {messages.map((msg, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  flexDirection:
+                    msg.userName === userName ? 'row-reverse' : 'row',
+                  alignItems: 'flex-start',
+                  gap: 1,
+                }}
+              >
+                <Paper
+                  sx={{
+                    p: 1,
+                    backgroundColor:
+                      msg.userName === userName
+                        ? theme.palette.secondary.main
+                        : theme.palette.background.paper,
+                    borderRadius: 2,
+                    maxWidth: '60%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems:
+                      msg.userName === userName ? 'flex-end' : 'flex-start',
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    fontWeight="bold"
+                    color={
+                      msg.userName === userName
+                        ? theme.palette.background.default
+                        : theme.palette.secondary.main
+                    }
+                  >
+                    {msg.userName || 'Anonymous'}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color={theme.palette.text.primary}
+                  >
+                    {msg.createdAt.toLocaleString()}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color={
+                      msg.userName === userName
+                        ? theme.palette.background.default
+                        : theme.palette.text.primary
+                    }
+                  >
+                    {msg.content || ''}
+                  </Typography>
+                </Paper>
+              </Box>
+            ))}
+            <div ref={messagesEndRef} />
+          </Box>
+          <Box>
+            <Box sx={{ p: 2, display: 'flex', gap: 1 }}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type a message..."
+                inputRef={textFieldRef}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handlePickerOpen}>😀</IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Popover
+                open={showPicker}
+                anchorEl={anchorEl}
+                onClose={handlePickerClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }}
+              >
+                <Picker data={data} onEmojiSelect={handleEmojiClick} />
+              </Popover>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={sendMessage}
+                disabled={!message.trim()}
+              >
+                Send
+              </Button>
+            </Box>
+          </Box>
+          {showScrollToBottom && (
+            <Box
               sx={{
+                position: 'absolute',
+                bottom: 80,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: theme.palette.secondary.main,
+                color: theme.palette.background.default,
+                opacity: 0.8,
+                boxShadow: 3,
+                borderRadius: 10,
                 p: 1,
-                backgroundColor:
-                  msg.userName === userName ? '#d1f7d6' : '#e0e0e0',
-                borderRadius: 2,
-                maxWidth: '60%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems:
-                  msg.userName === userName ? 'flex-end' : 'flex-start',
               }}
             >
-              <Typography variant="body2" fontWeight="bold">
-                {msg.userName || 'Anonymous'}
-              </Typography>
-              <Typography variant="body1">{msg.content || ''}</Typography>
-            </Paper>
-          </Box>
-        ))}
-        <div ref={messagesEndRef} />
-      </Box>
-      <Box>
-        <Box sx={{ p: 2, display: 'flex', gap: 1 }}>
-          <TextField
-            variant="outlined"
-            fullWidth
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
-            inputRef={textFieldRef}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handlePickerOpen}>😀</IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Popover
-            open={showPicker}
-            anchorEl={anchorEl}
-            onClose={handlePickerClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left',
-            }}
-          >
-            <Picker data={data} onEmojiSelect={handleEmojiClick} />
-          </Popover>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={sendMessage}
-            disabled={!message.trim()}
-          >
-            Send
-          </Button>
-        </Box>
-      </Box>
-      {showScrollToBottom && (
+              <IconButton
+                onClick={() =>
+                  chatContainerRef.current?.scrollTo({
+                    top: chatContainerRef.current.scrollHeight,
+                    behavior: 'smooth',
+                  })
+                }
+                color="inherit"
+              >
+                <ArrowDownwardIcon />
+              </IconButton>
+            </Box>
+          )}
+        </>
+      ) : (
         <Box
           sx={{
-            position: 'absolute',
-            bottom: 80,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: theme.palette.secondary.main,
-            color: theme.palette.background.default,
-            opacity: 0.8,
-            boxShadow: 3,
-            borderRadius: 10,
-            p: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            textAlign: 'center',
           }}
         >
-          <IconButton onClick={scrollToBottom} color="inherit">
-            <ArrowDownwardIcon />
-          </IconButton>
+          <Typography variant="h6">
+            Please{' '}
+            <Link href="/login" color="secondary">
+              Log in
+            </Link>{' '}
+            to access the chat.
+          </Typography>
         </Box>
       )}
     </Box>

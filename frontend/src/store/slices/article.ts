@@ -5,11 +5,13 @@ import {
   getArticleById,
   getArticles,
 } from '../../Services/ArticleService';
+import { getAuthorInfoByArticleId } from '../../Services/UserService';
 
 // 定义 slice 的初始状态
 export interface ArticleState {
   articles: any[];
   detail: any;
+  authorInfo: any;
   loading: boolean;
   error: string | null;
   selectedId?: number | null;
@@ -18,6 +20,7 @@ export interface ArticleState {
 const initialState: ArticleState = {
   articles: [],
   detail: null,
+  authorInfo: null,
   loading: false,
   error: null,
   selectedId: null,
@@ -59,6 +62,14 @@ export const getArticleByIdThunk: any = createAsyncThunk(
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  }
+);
+
+export const getAuthorInfoThunk: any = createAsyncThunk(
+  'article/fetchAuthorInfo',
+  async (authorId: number) => {
+    const response = await getAuthorInfoByArticleId(authorId);
+    return response;
   }
 );
 
@@ -110,6 +121,20 @@ const articleSlice = createSlice({
         state.detail = action.payload;
       })
       .addCase(getArticleByIdThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+    builder
+      .addCase(getAuthorInfoThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAuthorInfoThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.authorInfo = action.payload;
+        console.log('state.authorInfo:', state.authorInfo);
+      })
+      .addCase(getAuthorInfoThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

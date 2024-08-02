@@ -16,12 +16,15 @@ namespace backend.Controllers
     {
         private readonly UserService _userService;
         private readonly ILogger<UserController> _logger;
+        private readonly ArticleService _articleService;
 
-        public UserController(UserService userService, ILogger<UserController> logger)
+        public UserController(UserService userService, ILogger<UserController> logger, ArticleService articleService)
         {
             _userService = userService;
             _logger = logger;
+            _articleService = articleService;
         }
+
 
         [Authorize]
         [HttpGet("basicinfo")]
@@ -46,7 +49,6 @@ namespace backend.Controllers
 
             return Ok(user);
         }
-
         [Authorize]
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateUserProfile([FromBody] EditProfileRequest editProfileRequest)
@@ -65,14 +67,44 @@ namespace backend.Controllers
                 return Unauthorized(new { Message = "User is not authorized" });
             }
 
-            var success = await _userService.UpdateUserAsync(userEmail, editProfileRequest);
+            var updatedUser = await _userService.UpdateUserAsync(userEmail, editProfileRequest);
 
-            if (!success)
+            if (updatedUser == null)
             {
                 return NotFound(new { Message = "User not found" });
             }
 
-            return Ok(new { Message = "User profile updated successfully" });
+            return Ok(new
+            {
+                updatedUser
+            });
         }
+        [HttpGet("author/{articleId}")]
+        public async Task<IActionResult> GetAuthorInfoByArticleId(int articleId)
+        {
+            _logger.LogInformation($"Fetching author info for article ID: {articleId}");
+
+            var authorEmail = await _articleService.GetAuthorEmailByArticleIdAsync(articleId);
+            if (authorEmail == null)
+            {
+                return NotFound(new { Message = "Article or Author not found" });
+            }
+
+            var authorInfo = await _userService.GetUserBasicInfoAsync(authorEmail);
+            if (authorInfo == null)
+            {
+                return NotFound(new { Message = "Author not found" });
+            }
+
+            return Ok(new
+            {
+                authorInfo.UserName,
+                authorInfo.Avatar,
+                authorInfo.Email,
+                authorInfo.Bio
+            });
+        }
+
+
     }
 }
