@@ -26,6 +26,7 @@ import { ThumbUp, Visibility, Comment } from '@mui/icons-material';
 import { useAppDispatch } from '../store/useAppDispatch';
 import {
   getArticleByIdThunk,
+  getAuthorInfoThunk,
   setSelectedArticleId,
 } from '../store/slices/article';
 import { useAppSelector } from '../store/useAppSelecter';
@@ -38,12 +39,15 @@ import {
   removeFavoriteThunk,
 } from '../store/slices/favorite';
 import { Link, useNavigate } from 'react-router-dom';
+import { incrementArticleViewCount } from '../Services/ArticleService';
+import { checkFavorite } from '../Services/FavoriteService';
 
 const DetailPage: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const articleDetail = useAppSelector((state) => state.article.detail);
+  const authorInfo = useAppSelector((state) => state.article.authorInfo);
   const quillRef = useRef<HTMLDivElement | null>(null);
   const [articleId, setArticleId] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -51,7 +55,7 @@ const DetailPage: React.FC = () => {
     Array<{ id: string; text: string; level: number }>
   >([]);
 
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const isFavorite = useAppSelector((state) => state.favorite.isFavorite);
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
@@ -73,13 +77,14 @@ const DetailPage: React.FC = () => {
   useEffect(() => {
     if (articleId) {
       dispatch(getArticleByIdThunk(articleId));
+      dispatch(getAuthorInfoThunk(articleId));
+      incrementArticleViewCount(articleId);
     }
   }, [articleId]);
 
   useEffect(() => {
     if (articleId && userEmail) {
-      const fav = dispatch(checkFavoriteThunk({ articleId, userEmail }));
-      setIsFavorite(fav ? true : false);
+      dispatch(checkFavoriteThunk({ articleId, userEmail }));
     }
   }, [articleId, userEmail]);
 
@@ -115,7 +120,6 @@ const DetailPage: React.FC = () => {
       dispatch(
         addFavoriteThunk({ articleId: articleId!, userEmail: userEmail! })
       ).then(() => {
-        setIsFavorite(true);
         setSnackbarMessage('Add Favourite Success !');
         setIsLoginPrompt(false);
         setSnackbarOpen(true);
@@ -129,7 +133,6 @@ const DetailPage: React.FC = () => {
       dispatch(
         removeFavoriteThunk({ articleId: articleId!, userEmail: userEmail! })
       ).then(() => {
-        setIsFavorite(false);
         setSnackbarMessage('Cancel Favourite Success !');
         setIsLoginPrompt(false);
         setSnackbarOpen(true);
@@ -139,10 +142,6 @@ const DetailPage: React.FC = () => {
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
-  };
-
-  const handleSnackbarAction = () => {
-    navigate('/login'); // 假设登录页面的路径是 /login
   };
 
   const renderHeadings = (
@@ -194,14 +193,14 @@ const DetailPage: React.FC = () => {
               <CardContent>
                 <Avatar
                   sx={{ width: 100, height: 100, margin: 'auto' }}
-                  src={articleDetail?.author?.avatar || ''}
-                  alt={articleDetail?.author?.name || ''}
+                  src={authorInfo?.avatar || ''}
+                  alt={authorInfo?.userName || ''}
                 />
                 <Typography variant="h6" sx={{ mt: 2 }}>
-                  {articleDetail?.author?.name || ''}
+                  {authorInfo?.userName || 'Unknown Author'}
                 </Typography>
                 <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                  {articleDetail?.author?.bio || ''}
+                  {authorInfo?.bio || 'No bio available'}
                 </Typography>
               </CardContent>
             </Card>

@@ -41,6 +41,8 @@ import {
 import { ArticleSortOption } from '../Models/Article';
 import { useNavigate } from 'react-router-dom';
 import PublicChatRoom from './PublicChatRoom';
+import { fetchUserProfile } from '../store/slices/user';
+import { incrementArticleViewCount } from '../Services/ArticleService';
 
 const categories = [
   { value: '', label: '全部分类' },
@@ -63,6 +65,16 @@ const HomePage: React.FC = () => {
     ArticleSortOption.Date
   );
   const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchUserProfile());
+      console.log('Fetching user profile...');
+    } else {
+      console.log('No token found');
+    }
+  }, [token]);
 
   useEffect(() => {
     dispatch(
@@ -85,6 +97,7 @@ const HomePage: React.FC = () => {
   const handleArticleClick = (id: number) => {
     dispatch(setSelectedArticleId(id));
     console.log(`Selected Article ID: ${id}`);
+    incrementArticleViewCount(id);
     navigate(`/detail`);
   };
 

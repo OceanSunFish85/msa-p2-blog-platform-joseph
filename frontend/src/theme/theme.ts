@@ -8,6 +8,7 @@ export const lightTheme: ThemeOptions = {
     },
     secondary: {
       main: '#6B46C1', // 淡紫色
+      light: '#9F7AEA', // 较浅的淡紫色
     },
     background: {
       default: '#ffffff', // 白色

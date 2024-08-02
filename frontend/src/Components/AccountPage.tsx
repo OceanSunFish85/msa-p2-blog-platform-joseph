@@ -30,6 +30,11 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useAppDispatch } from '../store/useAppDispatch';
+import { useAppSelector } from '../store/useAppSelecter';
+import { RootState } from '../store/store';
+import { fetchUserProfile, updateUserInfoThunk } from '../store/slices/user';
+import { uploadAvatarThunk } from '../store/slices/upload';
 
 const mockArticles = [
   {
@@ -59,9 +64,12 @@ const mockArticles = [
 
 const AccountPage: React.FC = () => {
   const theme = useTheme();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state: RootState) => state.user);
   const [open, setOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -69,6 +77,7 @@ const AccountPage: React.FC = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setSelectedFile(null);
   };
 
   const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -81,6 +90,35 @@ const AccountPage: React.FC = () => {
 
   const handleMenuClose = () => {
     setMenuAnchorEl(null);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (selectedFile) {
+      try {
+        // 调用 uploadAvatarThunk 上传头像
+        const resultAction = await dispatch(
+          uploadAvatarThunk(selectedFile)
+        ).unwrap();
+        const avatarUrl = localStorage.getItem('userAvatar');
+
+        // 打印头像URL
+        console.log('Avatar uploaded:', avatarUrl);
+
+        // 更新用户信息中的头像URL
+        await dispatch(updateUserInfoThunk({ Avatar: avatarUrl })).unwrap();
+        await dispatch(fetchUserProfile());
+
+        handleClose();
+      } catch (error) {
+        console.error('Error uploading avatar:', error);
+      }
+    }
   };
 
   return (
@@ -110,7 +148,7 @@ const AccountPage: React.FC = () => {
                     {/* 头像 */}
                     <Avatar
                       sx={{ width: 100, height: 100, cursor: 'pointer' }}
-                      src="https://via.placeholder.com/100"
+                      src={user?.avatar || 'https://via.placeholder.com/100'}
                       alt="User Avatar"
                       onClick={handleClickOpen}
                     />
@@ -118,22 +156,27 @@ const AccountPage: React.FC = () => {
                       <DialogTitle>修改头像</DialogTitle>
                       <DialogContent>
                         <DialogContentText>
-                          您确定要修改头像吗？
+                          请选择要上传的头像图片：
                         </DialogContentText>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                        />
                       </DialogContent>
                       <DialogActions>
                         <Button onClick={handleClose}>取消</Button>
-                        <Button onClick={handleClose} color="primary">
+                        <Button onClick={handleUpload} color="primary">
                           确认
                         </Button>
                       </DialogActions>
                     </Dialog>
                     {/* 个人信息 */}
                     <Typography variant="h6" align="center" sx={{ mt: 2 }}>
-                      用户名
+                      {user?.userName}
                     </Typography>
                     <Typography variant="body1" align="center">
-                      兴趣标签: 编程, 阅读, 旅行
+                      {user?.bio}
                     </Typography>
                   </Box>
                 </Grid>

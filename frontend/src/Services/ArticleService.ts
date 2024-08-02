@@ -71,3 +71,29 @@ export const getArticleById = async (
     throw error;
   }
 };
+
+export const incrementArticleViewCount = async (articleId: number) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}article/increment-views/${articleId}`
+    );
+    console.log('Increment view count response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error incrementing article view count:', error);
+    throw error;
+  }
+};
+
+export const handleArticleLikeCount = async (id: number, action: number) => {
+  try {
+    const response = await axiosInstance.post(
+      `${API_URL}favorite//${id}`,
+      action
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error liking article:', error);
+    throw error;
+  }
+};

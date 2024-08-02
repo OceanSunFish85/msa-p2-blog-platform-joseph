@@ -8,7 +8,7 @@ import {
 export interface UploadState {
   isLoading: boolean;
   error: string | null;
-  avatar: string[];
+  avatar: string | null;
   cover: string | null;
   articleMedia: string[];
 }
@@ -16,7 +16,7 @@ export interface UploadState {
 const initialState: UploadState = {
   isLoading: false,
   error: null,
-  avatar: [],
+  avatar: null,
   cover: null,
   articleMedia: [],
 };
@@ -67,8 +67,7 @@ const uploadSlice = createSlice({
     resetUploadState: (state) => {
       state.isLoading = false;
       state.error = null;
-      state.avatar = [];
-      state.cover = null;
+      (state.avatar = null), (state.cover = null);
     },
   },
   extraReducers: (builder) => {
@@ -81,7 +80,8 @@ const uploadSlice = createSlice({
         uploadAvatarThunk.fulfilled,
         (state, action: PayloadAction<string>) => {
           state.isLoading = false;
-          state.avatar = [action.payload];
+          state.avatar = action.payload;
+          localStorage.setItem('userAvatar', action.payload);
         }
       )
       .addCase(

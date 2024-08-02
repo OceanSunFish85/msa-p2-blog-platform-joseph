@@ -185,6 +185,67 @@ namespace backend.Services
             return pagedArticles;
         }
 
+        public async Task<string?> GetAuthorEmailByArticleIdAsync(int articleId)
+        {
+            _logger.LogInformation($"Fetching article with ID: {articleId}");
+
+            var articleEmail = await _context.Articles
+                .Where(a => a.Id == articleId)
+                .Select(a => a.AuthorEmail)
+                .SingleOrDefaultAsync();
+
+            if (articleEmail == null)
+            {
+                _logger.LogWarning($"Article with ID {articleId} not found");
+                return null;
+            }
+
+            _logger.LogInformation($"Author email for article ID {articleId}: {articleEmail}");
+            return articleEmail;
+        }
+
+        public async Task IncrementViewsAsync(int articleId)
+        {
+            var article = await _context.Articles.SingleOrDefaultAsync(a => a.Id == articleId);
+
+            if (article == null)
+            {
+                _logger.LogWarning($"Article with ID {articleId} not found");
+                throw new Exception("Article not found");
+            }
+
+            article.Views += 1;
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task HandleFavoritCount(int articleId, int action)
+        {
+            var article = await _context.Articles.SingleOrDefaultAsync(a => a.Id == articleId);
+
+            if (article == null)
+            {
+                _logger.LogWarning($"Article with ID {articleId} not found");
+                throw new Exception("Article not found");
+            }
+
+            if (action == 1) // Add favorite
+            {
+                article.Likes += 1;
+            }
+            else if (action == 0) // Remove favorite
+            {
+                article.Likes = Math.Max(0, article.Likes - 1);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid action");
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
     }
 
 }

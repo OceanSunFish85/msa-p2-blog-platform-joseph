@@ -4,6 +4,7 @@ using backend.Data;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using backend.Models;
+using backend.Entities;
 
 namespace backend.Services
 {
@@ -47,8 +48,7 @@ namespace backend.Services
             _logger.LogInformation("User found: {User}", user);
             return user;
         }
-
-        public async Task<bool> UpdateUserAsync(string email, EditProfileRequest editProfileRequest)
+        public async Task<UserBasicInfo> UpdateUserAsync(string email, EditProfileRequest editProfileRequest)
         {
             _logger.LogInformation("Updating user profile for email: {Email}", email);
 
@@ -56,22 +56,42 @@ namespace backend.Services
             if (user == null)
             {
                 _logger.LogWarning("User not found in database for email: {Email}", email);
-                return false;
+                return null;
             }
 
             if (!string.IsNullOrWhiteSpace(editProfileRequest.UserName))
             {
                 user.UserName = editProfileRequest.UserName;
             }
+            if (!string.IsNullOrWhiteSpace(editProfileRequest.Bio))
+            {
+                user.Bio = editProfileRequest.Bio;
+            }
+            if (!string.IsNullOrWhiteSpace(editProfileRequest.Avatar))
+            {
+                user.Avatar = editProfileRequest.Avatar;
+            }
 
-            user.Bio = editProfileRequest.Bio;
             user.UpdatedAt = DateTime.UtcNow;
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("User profile updated: {User}", user);
-            return true;
+
+            // 返回 UserBasicInfo 对象
+            return new UserBasicInfo
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                CreatedAt = user.CreatedAt,
+                UpdatedAt = user.UpdatedAt,
+                Avatar = user.Avatar,
+                Bio = user.Bio,
+                UserStatus = user.UserStatus,
+                Role = user.Role
+            };
         }
     }
 }

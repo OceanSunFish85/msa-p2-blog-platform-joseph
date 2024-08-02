@@ -2,13 +2,26 @@ import { Role } from './enums/Role';
 import { UserStatus } from './enums/UserStatus';
 
 export interface UserBasicInfo {
-  Id?: string;
+  id?: string;
+  userName?: string;
+  email?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  avatar?: string;
+  bio?: string;
+  userStatus: UserStatus;
+  role?: Role;
+}
+
+export interface EditProfileRequest {
   UserName?: string;
-  Email?: string;
-  CreatedAt: Date;
-  UpdatedAt: Date;
-  Avatar?: string;
   Bio?: string;
-  UserStatus: UserStatus;
-  Role?: Role;
+  Avatar?: string;
+}
+
+export interface AuthorInfo {
+  userName: string;
+  avatar: string;
+  email: string;
+  bio: string;
 }

@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
 import { login } from '../store/slices/auth';
 import { useNavigate } from 'react-router-dom';
+import { fetchUserProfile } from '../store/slices/user';
 
 const LoginPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

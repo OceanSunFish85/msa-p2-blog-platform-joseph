@@ -17,7 +17,7 @@ namespace backend.Data
         public DbSet<ArticleMedia> ArticleMedias { get; set; }
         public DbSet<Favorite> Favorites { get; set; }
         public DbSet<Message> Messages { get; set; }
-
+        public DbSet<Comment> Comments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

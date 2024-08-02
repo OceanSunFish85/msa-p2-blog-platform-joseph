@@ -7,12 +7,14 @@ import {
 
 export interface FavoriteState {
   favorites: number[];
+  isFavorite: boolean;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: FavoriteState = {
   favorites: [],
+  isFavorite: false,
   loading: false,
   error: null,
 };
@@ -46,7 +48,7 @@ export const removeFavoriteThunk: any = createAsyncThunk(
 );
 
 export const checkFavoriteThunk: any = createAsyncThunk(
-  'favorite/checkFavorite',
+  'favorite/chectFavorite',
   async ({
     articleId,
     userEmail,
@@ -54,9 +56,9 @@ export const checkFavoriteThunk: any = createAsyncThunk(
     articleId: number;
     userEmail: string;
   }) => {
-    const favorite = await checkFavorite(articleId, userEmail);
-    console.log('Favorite:', favorite);
-    return favorite ? articleId : null;
+    const isFavorite = await checkFavorite(articleId, userEmail);
+    console.log('Favorite Thunk:', isFavorite);
+    return isFavorite;
   }
 );
 
@@ -72,6 +74,7 @@ const favoriteSlice = createSlice({
       })
       .addCase(addFavoriteThunk.fulfilled, (state, action) => {
         state.loading = false;
+        state.isFavorite = true;
         state.favorites.push(action.payload);
       })
       .addCase(addFavoriteThunk.rejected, (state, action) => {
@@ -84,6 +87,7 @@ const favoriteSlice = createSlice({
       })
       .addCase(removeFavoriteThunk.fulfilled, (state, action) => {
         state.loading = false;
+        state.isFavorite = false;
         state.favorites = state.favorites.filter((id) => id !== action.payload);
       })
       .addCase(removeFavoriteThunk.rejected, (state, action) => {
@@ -92,17 +96,15 @@ const favoriteSlice = createSlice({
       })
       .addCase(checkFavoriteThunk.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(checkFavoriteThunk.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload) {
-          state.favorites.push(action.payload);
-        }
+        state.isFavorite = action.payload; // 确保设置为布尔值
+        console.log('state.isFavorite action:', state.isFavorite);
       })
-      .addCase(checkFavoriteThunk.rejected, (state, action) => {
+      .addCase(checkFavoriteThunk.rejected, (state) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to check favorite';
+        state.isFavorite = false;
       });
   },
 });
