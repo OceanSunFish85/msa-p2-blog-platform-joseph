@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   AppBar,
   Avatar,
   Box,
@@ -22,6 +23,7 @@ import {
   ListItem,
   Menu,
   MenuItem,
+  Snackbar,
   Stack,
   Tab,
   Tabs,
@@ -47,9 +49,14 @@ import { useAppSelector } from '../store/useAppSelecter';
 import { RootState } from '../store/store';
 import { fetchUserProfile, updateUserInfoThunk } from '../store/slices/user';
 import { uploadAvatarThunk } from '../store/slices/upload';
-import { getUserArticlesThunk } from '../store/slices/article';
+import {
+  deleteArticleThunk,
+  getUserArticlesThunk,
+  setSelectedArticleId,
+} from '../store/slices/article';
 import { ArticleStatus } from '../Models/enums/ArticleStatus';
 import { ArticleSortOption } from '../Models/Article';
+import { useNavigate } from 'react-router-dom';
 
 const AccountPage: React.FC = () => {
   const theme = useTheme();
@@ -68,6 +75,9 @@ const AccountPage: React.FC = () => {
   const userBio = localStorage.getItem('userBio');
   const userName = localStorage.getItem('username');
 
+  const [diaOpen, setDiaOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(
     null
   );
@@ -76,11 +86,12 @@ const AccountPage: React.FC = () => {
   const [sortOption, setSortOption] = useState<ArticleSortOption>(
     ArticleSortOption.Date
   );
-
+  const navigate = useNavigate();
   const [searchKey, setSearchKey] = useState('');
   const [debouncedSearchKey, setDebouncedSearchKey] = useState(searchKey);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
+  const [deleteArticleId, setDeleteArticleId] = useState<number | null>(null);
   useEffect(() => {
     // 设置debouncedSearchKey，延迟请求
     if (timeoutId) {
@@ -111,6 +122,12 @@ const AccountPage: React.FC = () => {
 
   const handleClickOpen = () => {
     setOpen(true);
+  };
+
+  const handleArticleClick = (id: number) => {
+    dispatch(setSelectedArticleId(id));
+    console.log(`Selected Article ID: ${id}`);
+    navigate(`/editPost`);
   };
 
   const handleClose = () => {
@@ -183,6 +200,40 @@ const AccountPage: React.FC = () => {
     return text.length > maxLength
       ? `${text.substring(0, maxLength)}...`
       : text;
+  };
+
+  const handleClickDiaOpen = (id: number) => {
+    setDeleteArticleId(id);
+    setDiaOpen(true);
+  };
+
+  const handleDiaClose = () => {
+    setDiaOpen(false);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      console.log('Deleting article:', id);
+      await dispatch(deleteArticleThunk(id));
+      handleDiaClose();
+      setSnackbarOpen(true);
+      dispatch(
+        getUserArticlesThunk({
+          searchKey: debouncedSearchKey || '',
+          status: tabValue,
+          pageNumber: 1,
+          pageSize: 10,
+          sortBy: sortOption,
+          sortOrder: sortOrder,
+        })
+      );
+    } catch (error) {
+      console.error('Error deleting article:', error);
+    }
   };
 
   return (
@@ -584,28 +635,57 @@ const AccountPage: React.FC = () => {
                           >
                             <Tooltip title="编辑文章" arrow>
                               <IconButton
-                                onClick={handleMenuClose}
+                                onClick={() =>
+                                  handleArticleClick(userArticle.id)
+                                }
                                 color="secondary"
                               >
                                 <EditIcon />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="设置状态" arrow>
-                              <IconButton
-                                onClick={handleMenuClose}
-                                color="secondary"
-                              >
-                                <PublicIcon />
-                              </IconButton>
-                            </Tooltip>
                             <Tooltip title="删除" arrow>
                               <IconButton
-                                onClick={handleMenuClose}
+                                onClick={() => {
+                                  handleClickDiaOpen(userArticle.id);
+                                }}
                                 color="secondary"
                               >
                                 <DeleteIcon />
                               </IconButton>
                             </Tooltip>
+
+                            <Snackbar
+                              open={snackbarOpen}
+                              autoHideDuration={6000}
+                              onClose={handleSnackbarClose}
+                              anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                              }}
+                              sx={{
+                                mt: 8,
+                                bgcolor: theme.palette.secondary.main,
+                                opacity: 0.9,
+                                borderRadius: 1,
+                              }}
+                            >
+                              <Alert
+                                onClose={handleSnackbarClose}
+                                severity="success"
+                                sx={{
+                                  width: '100%',
+                                  opacity: 0.9,
+                                  backgroundColor: theme.palette.secondary.main,
+                                  borderRadius: 1,
+                                  color: theme.palette.background.default,
+                                  '& .MuiAlert-icon': {
+                                    color: theme.palette.background.default, // 自定义图标颜色
+                                  },
+                                }}
+                              >
+                                文章删除成功！
+                              </Alert>
+                            </Snackbar>
                           </CardActions>
                         </Box>
                       </Box>
@@ -617,6 +697,33 @@ const AccountPage: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
+      <Dialog
+        open={diaOpen}
+        onClose={handleDiaClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">删除文章</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            你确定要删除这篇文章吗？此操作无法撤销。
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDiaClose} color="primary">
+            取消
+          </Button>
+          <Button
+            onClick={() => {
+              handleDelete(deleteArticleId!);
+            }}
+            color="primary"
+            autoFocus
+          >
+            确定
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

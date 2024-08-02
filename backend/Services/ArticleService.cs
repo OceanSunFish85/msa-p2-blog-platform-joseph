@@ -1,3 +1,4 @@
+using System.Linq;
 using backend.Data;
 using backend.Entities;
 using backend.Models;
@@ -83,6 +84,128 @@ namespace backend.Services
             }
         }
 
+        public async Task<bool> EditArticleAsync(int id, EditArticleRequest editArticleRequest)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // 获取文章
+                    var article = await _context.Articles.FirstOrDefaultAsync(a => a.Id == id);
+
+                    if (article == null)
+                    {
+                        return false;
+                    }
+
+                    // 获取文章内容
+                    var articleContent = await _context.ArticleContents.FirstOrDefaultAsync(c => c.Id == article.ContentId);
+                    if (articleContent == null)
+                    {
+                        return false;
+                    }
+
+                    // 更新文章内容
+                    if (!string.IsNullOrEmpty(editArticleRequest.HtmlContent))
+                    {
+                        articleContent.HtmlContent = editArticleRequest.HtmlContent;
+                        _context.ArticleContents.Update(articleContent);
+                    }
+
+                    // 更新文章元数据
+                    if (!string.IsNullOrEmpty(editArticleRequest.Title))
+                    {
+                        article.Title = editArticleRequest.Title;
+                    }
+                    if (!string.IsNullOrEmpty(editArticleRequest.Summary))
+                    {
+                        article.Summary = editArticleRequest.Summary;
+                    }
+                    if (!string.IsNullOrEmpty(editArticleRequest.Cover))
+                    {
+                        article.Cover = editArticleRequest.Cover;
+                    }
+                    if (editArticleRequest.CategoryId != null)
+                    {
+                        article.CategoryId = editArticleRequest.CategoryId.Value;
+                    }
+                    if (editArticleRequest.Status != null)
+                    {
+                        article.Status = editArticleRequest.Status;
+                    }
+                    article.UpdatedAt = DateTime.UtcNow;
+
+                    _context.Articles.Update(article);
+                    await _context.SaveChangesAsync();
+
+                    // 提交事务
+                    await transaction.CommitAsync();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    // 回滚事务
+                    await transaction.RollbackAsync();
+                    // 记录异常
+                    _logger.LogError(ex, "Error editing article");
+                    throw;
+                }
+            }
+        }
+
+        public async Task<bool> DeleteArticleAsync(int articleId, string userEmail)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // 获取文章
+                    var article = await _context.Articles
+                        .FirstOrDefaultAsync(a => a.Id == articleId && a.AuthorEmail == userEmail);
+
+                    if (article == null)
+                    {
+                        return false;
+                    }
+
+                    // 删除文章内容
+                    var content = await _context.ArticleContents.FindAsync(article.ContentId);
+                    if (content != null)
+                    {
+                        _context.ArticleContents.Remove(content);
+                    }
+
+                    // 删除文章媒体
+                    var mediaList = await _context.ArticleMedias
+                        .Where(m => m.ArticleId == articleId)
+                        .ToListAsync();
+                    if (mediaList.Any())
+                    {
+                        _context.ArticleMedias.RemoveRange(mediaList);
+                    }
+
+                    // 删除文章元数据
+                    _context.Articles.Remove(article);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error deleting article");
+                    throw;
+                }
+            }
+        }
+
+
+
+
+
         public async Task<ArticleDetailResponse?> GetArticleByIdAsync(int id)
         {
             // 获取文章及其内容
@@ -124,6 +247,8 @@ namespace backend.Services
                 }).ToList()
             };
         }
+
+
 
         public List<ArticleListResponse> GetArticles(int pageNumber, int pageSize, string sortBy, string sortOrder)
         {

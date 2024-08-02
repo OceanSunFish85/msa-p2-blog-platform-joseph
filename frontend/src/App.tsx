@@ -23,6 +23,7 @@ import NewPost from './Components/NewPost';
 import LoginPage from './Components/LoginPage';
 import GlobalSpin from './Components/GlobalSpin';
 import GlobalSkeleton from './Components/GlobalSkeleton';
+import EditArticle from './Components/EditArticle';
 
 const App: React.FC = () => {
   const theme = useSelector((state: RootState) => state.global.theme);
@@ -54,6 +55,7 @@ const App: React.FC = () => {
                   <Route path="/account" element={<AccountPage />} />{' '}
                   <Route path="/detail" element={<DetailPage />} />{' '}
                   <Route path="/newPost" element={<NewPost />} />{' '}
+                  <Route path="/editPost" element={<EditArticle />} />
                   {/* 默认页面 */}
                   {/* Add other routes here */}
                 </Routes>

@@ -29,6 +29,16 @@ export interface NewArticleRequest {
   Media?: ArticleMedia[];
 }
 
+export interface UpdateArticleRequest {
+  Title: string;
+  Summary: string;
+  Cover: string;
+  CategoryId?: number;
+  HtmlContent: string;
+  Status: ArticleStatus;
+  Media?: ArticleMedia[];
+}
+
 export enum ArticleSortOption {
   Comments = 'CommentsCount',
   Views = 'Views',
