@@ -4,6 +4,7 @@ import {
   ArticleDetailResponse,
   ArticleListResponse,
   ArticleSortOption,
+  GetArticlesParams,
   NewArticleRequest,
 } from '../Models/Article';
 import axios from 'axios';
@@ -28,13 +29,6 @@ export const createArticle = async (newArticleRequest: NewArticleRequest) => {
   }
 };
 
-interface GetArticlesParams {
-  pageNumber: number;
-  pageSize: number;
-  sortBy: ArticleSortOption;
-  sortOrder: 'asc' | 'desc';
-}
-
 export const getArticles = async (
   params: GetArticlesParams
 ): Promise<ArticleListResponse[]> => {
@@ -53,6 +47,30 @@ export const getArticles = async (
     return response.data;
   } catch (error) {
     console.error('Error fetching articles:', error);
+    throw error;
+  }
+};
+
+export const getUserArticles = async (
+  params: GetArticlesParams
+): Promise<ArticleListResponse[]> => {
+  try {
+    const response = await axiosInstance.get<ArticleListResponse[]>(
+      `${API_URL}article/user-articles`,
+      {
+        params: {
+          searchKey: params.searchKey,
+          pageNumber: params.pageNumber,
+          pageSize: params.pageSize,
+          sortBy: params.sortBy,
+          sortOrder: params.sortOrder,
+          status: params.status,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user articles:', error);
     throw error;
   }
 };
@@ -96,4 +114,11 @@ export const handleArticleLikeCount = async (id: number, action: number) => {
     console.error('Error liking article:', error);
     throw error;
   }
+};
+
+export const incrementCommentsCount = async (articleId: number) => {
+  const response = await axios.post(
+    `${API_URL}article/increment-comments/${articleId}`
+  );
+  return response.data;
 };

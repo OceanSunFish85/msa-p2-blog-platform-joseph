@@ -7,6 +7,7 @@ import aiSlice from './slices/ai';
 import articleSlice from './slices/article';
 import favoriteSlice from './slices/favorite';
 import searchSlice from './slices/search';
+import commentSlice from './slices/comment';
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     article: articleSlice.reducer,
     favorite: favoriteSlice.reducer,
     search: searchSlice.reducer,
+    comment: commentSlice.reducer,
   },
 });
 

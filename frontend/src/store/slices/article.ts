@@ -1,15 +1,22 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { ArticleSortOption, NewArticleRequest } from '../../Models/Article';
+import {
+  ArticleListResponse,
+  ArticleSortOption,
+  GetArticlesParams,
+  NewArticleRequest,
+} from '../../Models/Article';
 import {
   createArticle,
   getArticleById,
   getArticles,
+  getUserArticles,
 } from '../../Services/ArticleService';
 import { getAuthorInfoByArticleId } from '../../Services/UserService';
 
 // 定义 slice 的初始状态
 export interface ArticleState {
   articles: any[];
+  userArticles: any[];
   detail: any;
   authorInfo: any;
   loading: boolean;
@@ -19,6 +26,7 @@ export interface ArticleState {
 
 const initialState: ArticleState = {
   articles: [],
+  userArticles: [],
   detail: null,
   authorInfo: null,
   loading: false,
@@ -52,6 +60,14 @@ export const getArticlesThunk: any = createAsyncThunk(
     return response;
   }
 );
+
+export const getUserArticlesThunk: any = createAsyncThunk<
+  ArticleListResponse[],
+  GetArticlesParams
+>('articles/fetchUserArticles', async (params) => {
+  const response = await getUserArticles(params);
+  return response;
+});
 
 export const getArticleByIdThunk: any = createAsyncThunk(
   'article/fetchArticleById',
@@ -108,6 +124,20 @@ const articleSlice = createSlice({
         state.loading = false;
       })
       .addCase(getArticlesThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch articles';
+      });
+    builder
+      .addCase(getUserArticlesThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserArticlesThunk.fulfilled, (state, action) => {
+        state.userArticles = action.payload;
+        console.log('state.articles:', state.userArticles);
+        state.loading = false;
+      })
+      .addCase(getUserArticlesThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch articles';
       });

@@ -90,4 +90,33 @@ public class ArticleController : ControllerBase
             return StatusCode(500, new { Message = "An error occurred while handling favorite action" });
         }
     }
+
+    [HttpPost("increment-comments/{articleId}")]
+    public async Task<IActionResult> IncrementCommentsCount(int articleId)
+    {
+        try
+        {
+            await _articleService.IncrementCommentsCountAsync(articleId);
+            return Ok(new { Message = "Comments count incremented successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error incrementing comments count for article ID: {ArticleId}", articleId);
+            return StatusCode(500, new { Message = "An error occurred while incrementing the comments count" });
+        }
+    }
+    [HttpGet("user-articles")]
+    [Authorize]
+    public IActionResult GetUserArticles(
+        ArticleStatus status,
+        string searchKey = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortBy = ArticleSortOption.Date,
+        string sortOrder = "desc")
+    {
+        var userEmail = User.FindFirstValue(ClaimTypes.Email);
+        var articles = _articleService.GetUserArticles(userEmail, status, searchKey, pageNumber, pageSize, sortBy, sortOrder);
+        return Ok(articles);
+    }
 }
