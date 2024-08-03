@@ -9,10 +9,7 @@ export interface LoginRequest {
   Password: string;
 }
 
-export interface RegisterRequest {}
-
-export interface RegisterResponse {}
-
-export interface ForgotPasswordRequest {}
-
-export interface ForgotPasswordResponse {}
+export interface ChangePasswordRequest {
+  CurrentPassword: string;
+  NewPassword: string;
+}

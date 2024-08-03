@@ -250,7 +250,7 @@ namespace backend.Services
 
 
 
-        public List<ArticleListResponse> GetArticles(int pageNumber, int pageSize, string sortBy, string sortOrder)
+        public List<ArticleListResponse> GetArticles(int pageNumber, int pageSize, string sortBy, string sortOrder, string searchKey)
         {
             var validSortOptions = new List<string> { ArticleSortOption.Comments, ArticleSortOption.Views, ArticleSortOption.Likes, ArticleSortOption.Date };
             if (!validSortOptions.Contains(sortBy))
@@ -269,6 +269,10 @@ namespace backend.Services
                         where article.Status == ArticleStatus.Published // Add filter for Published status
                         select new { article, content.HtmlContent };
 
+            if (!string.IsNullOrEmpty(searchKey))
+            {
+                query = query.Where(a => a.article.Title.Contains(searchKey) || a.article.Summary.Contains(searchKey));
+            }
             // Apply sorting
             switch (sortBy)
             {

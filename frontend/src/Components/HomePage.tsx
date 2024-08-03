@@ -49,9 +49,11 @@ const HomePage: React.FC = () => {
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(
     null
   );
-
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const dispatch = useAppDispatch();
   const articles = useAppSelector((state) => state.article.articles);
+  const searchMessage = useAppSelector((state) => state.article.searchMessage);
+  const [searchKey, setSearchKey] = useState<string>(searchMessage ?? '');
   const theme = useTheme();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortOption, setSortOption] = useState<ArticleSortOption>(
@@ -70,15 +72,17 @@ const HomePage: React.FC = () => {
   }, [token]);
 
   useEffect(() => {
+    setSearchKey(searchMessage);
     dispatch(
       getArticlesThunk({
-        pageNumber: 1,
+        pageNumber: currentPage,
         pageSize: 10,
         sortBy: sortOption,
         sortOrder: sortOrder,
+        searchKey: searchKey,
       })
     );
-  }, [sortOption, sortOrder, dispatch]);
+  }, [sortOption, sortOrder, dispatch, searchKey, searchMessage, currentPage]);
 
   const handleTabOnChange = (
     event: React.ChangeEvent<{}>,
@@ -111,10 +115,26 @@ const HomePage: React.FC = () => {
     setFilterAnchorEl(null);
   };
 
-  const truncateText = (text: string, maxLength: number): string => {
+  const truncateText = (
+    text: string | undefined,
+    maxLength: number
+  ): string => {
+    if (!text) {
+      return '';
+    }
     return text.length > maxLength
       ? `${text.substring(0, maxLength)}...`
       : text;
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
   };
 
   return (
@@ -216,7 +236,6 @@ const HomePage: React.FC = () => {
                       }}
                     >
                       <Tab label="全部" />
-                      <Tab label="关注" />
                     </Tabs>
                     <IconButton color="inherit" onClick={handleSortOrderClick}>
                       {sortOrder === 'asc' ? (
@@ -285,123 +304,150 @@ const HomePage: React.FC = () => {
                 </AppBar>
                 <Box sx={{ p: 2, height: '100%' }}>
                   <List>
-                    {articles.map((article) =>
-                      article ? (
-                        <ListItem key={article.id}>
-                          <Card
+                    {articles.map((article) => (
+                      <ListItem key={article.id}>
+                        <Card
+                          sx={{
+                            display: 'flex',
+                            width: '100%',
+                            backgroundColor: theme.palette.background.default,
+                          }}
+                        >
+                          <CardMedia
+                            component="img"
+                            sx={{
+                              width: 200,
+                              height: 166,
+                              cursor: 'pointer',
+                            }}
+                            image={article.cover}
+                            alt={article.title}
+                            onClick={() => handleArticleClick(article.id)}
+                          />
+                          <Box
                             sx={{
                               display: 'flex',
+                              flexDirection: 'column',
                               width: '100%',
-                              backgroundColor: theme.palette.background.default,
                             }}
                           >
-                            <CardMedia
-                              component="img"
-                              sx={{
-                                width: 200,
-                                height: 166,
-                                cursor: 'pointer',
-                              }}
-                              image={article.cover}
-                              alt={article.title}
-                              onClick={() => handleArticleClick(article.id)}
-                            />
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                width: '100%',
-                              }}
-                            >
-                              <CardContent>
-                                <Tooltip title={article.title} placement="top">
-                                  <Typography variant="h6" component="div">
-                                    {truncateText(article.title, 30)}
-                                  </Typography>
-                                </Tooltip>
-                                <Tooltip
-                                  title={article.summary}
-                                  placement="top"
+                            <CardContent>
+                              <Tooltip title={article.title} placement="top">
+                                <Typography variant="h6" component="div">
+                                  {truncateText(article.title, 30)}
+                                </Typography>
+                              </Tooltip>
+                              <Tooltip title={article.summary} placement="top">
+                                <Typography
+                                  variant="body2"
+                                  color="text.primary"
                                 >
-                                  <Typography
-                                    variant="body2"
-                                    color="text.primary"
-                                  >
-                                    {truncateText(article.summary, 100)}
-                                  </Typography>
-                                </Tooltip>
-                              </CardContent>
-                              <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                padding="8px"
-                              >
-                                <Box display="flex" alignItems="center">
-                                  <VisibilityIcon
-                                    fontSize="small"
-                                    sx={{ marginRight: '4px' }}
-                                  />
-                                  <Typography
-                                    variant="body2"
-                                    color="secondary.main"
-                                    sx={{ marginRight: '16px' }}
-                                  >
-                                    {article.views}
-                                  </Typography>
-                                  <CommentIcon
-                                    fontSize="small"
-                                    sx={{ marginRight: '4px' }}
-                                  />
-                                  <Typography
-                                    variant="body2"
-                                    color="secondary.main"
-                                    sx={{ marginRight: '16px' }}
-                                  >
-                                    {article.commentsCount}
-                                  </Typography>
-                                  <ThumbUpIcon
-                                    fontSize="small"
-                                    sx={{ marginRight: '4px' }}
-                                  />
-                                  <Typography
-                                    variant="body2"
-                                    color="secondary.main"
-                                    sx={{ marginRight: '16px' }}
-                                  >
-                                    {article.likes}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="secondary.main"
-                                  >
-                                    {new Date(
-                                      article.createdAt
-                                    ).toLocaleDateString()}
-                                  </Typography>
-                                </Box>
-                                <CardActions>
-                                  <Button
-                                    size="small"
-                                    color="secondary"
-                                    onClick={() =>
-                                      handleArticleClick(article.id)
-                                    }
-                                  >
-                                    Read More
-                                  </Button>
-                                </CardActions>
+                                  {truncateText(article.summary, 100)}
+                                </Typography>
+                              </Tooltip>
+                            </CardContent>
+                            <Box
+                              display="flex"
+                              justifyContent="space-between"
+                              alignItems="center"
+                              padding="8px"
+                            >
+                              <Box display="flex" alignItems="center">
+                                <VisibilityIcon
+                                  fontSize="small"
+                                  sx={{ marginRight: '4px' }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                  sx={{ marginRight: '16px' }}
+                                >
+                                  {article.views}
+                                </Typography>
+                                <CommentIcon
+                                  fontSize="small"
+                                  sx={{ marginRight: '4px' }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                  sx={{ marginRight: '16px' }}
+                                >
+                                  {article.commentsCount}
+                                </Typography>
+                                <ThumbUpIcon
+                                  fontSize="small"
+                                  sx={{ marginRight: '4px' }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                  sx={{ marginRight: '16px' }}
+                                >
+                                  {article.likes}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="secondary.main"
+                                >
+                                  {new Date(
+                                    article.createdAt
+                                  ).toLocaleDateString()}
+                                </Typography>
                               </Box>
+                              <CardActions>
+                                <Button
+                                  size="small"
+                                  color="secondary"
+                                  onClick={() => handleArticleClick(article.id)}
+                                >
+                                  Read More
+                                </Button>
+                              </CardActions>
                             </Box>
-                          </Card>
-                        </ListItem>
-                      ) : (
-                        <Skeleton variant="circular" width={210} height={118} />
-                      )
-                    )}
+                          </Box>
+                        </Card>
+                      </ListItem>
+                    ))}
                   </List>
                 </Box>
               </Grid>
+              {/* Pagination Controls */}
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                mt={4}
+                width="100%"
+              >
+                <Grid container alignItems="center">
+                  <Grid item xs={4} display="flex" justifyContent="flex-start">
+                    {currentPage > 1 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handlePrevPage}
+                      >
+                        Prev
+                      </Button>
+                    )}
+                  </Grid>
+                  <Grid item xs={4} display="flex" justifyContent="center">
+                    <Typography variant="body1">Page {currentPage}</Typography>
+                  </Grid>
+                  <Grid item xs={4} display="flex" justifyContent="flex-end">
+                    {articles.length === 10 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleNextPage}
+                      >
+                        Next
+                      </Button>
+                    )}
+                  </Grid>
+                </Grid>
+              </Box>
             </Grid>
           </Grid>
 

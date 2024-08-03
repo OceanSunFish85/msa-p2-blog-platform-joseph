@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { LoginRequest, LoginResponse } from '../../Models/Auth';
+import {
+  ChangePasswordRequest,
+  LoginRequest,
+  LoginResponse,
+} from '../../Models/Auth';
 import AuthService from '../../Services/AuthService';
 import { useDispatch } from 'react-redux';
 import { useAppDispatch } from '../useAppDispatch';
@@ -43,6 +47,19 @@ export const login: any = createAsyncThunk<LoginResponse, LoginRequest>(
   }
 );
 
+export const changePasswordThunk: any = createAsyncThunk(
+  'auth/changePassword',
+  async (data: ChangePasswordRequest, thunkAPI) => {
+    try {
+      const response = await AuthService.changePassword(data);
+      thunkAPI.dispatch(logout()); // 修改密码成功后触发登出
+      return response;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -81,7 +98,22 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action: PayloadAction<any>) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(changePasswordThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(changePasswordThunk.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(
+        changePasswordThunk.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.isLoading = false;
+          state.error = action.payload;
+        }
+      );
   },
 });
 
