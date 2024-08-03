@@ -41,7 +41,7 @@ export const uploadCoverThunk: any = createAsyncThunk(
       const url = await uploadCover(file);
       return url;
     } catch (error: any) {
-      console.error('Thunk upload error:', error);
+      //console.error('Thunk upload error:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -54,7 +54,7 @@ export const uploadArticleMediaThunk: any = createAsyncThunk(
       const urls = await uploadArticleMedia(files);
       return urls;
     } catch (error: any) {
-      console.error('Thunk upload error:', error);
+      //console.error('Thunk upload error:', error);
       return rejectWithValue(error.message);
     }
   }

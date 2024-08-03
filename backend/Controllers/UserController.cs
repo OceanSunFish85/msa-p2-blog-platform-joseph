@@ -11,7 +11,6 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // 确保此控制器需要认证
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;

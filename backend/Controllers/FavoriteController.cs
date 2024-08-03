@@ -16,7 +16,7 @@ namespace backend.Controllers
             _favoriteService = favoriteService;
         }
 
-        // 添加收藏
+
         [HttpPost("add")]
         public async Task<IActionResult> AddFavorite(int articleId, string userEmail)
         {
@@ -29,7 +29,7 @@ namespace backend.Controllers
             return Ok(favorite);
         }
 
-        // 删除收藏
+
         [HttpDelete("remove")]
         public async Task<IActionResult> RemoveFavorite(int articleId, string userEmail)
         {
@@ -42,7 +42,7 @@ namespace backend.Controllers
             return Ok(favorite);
         }
 
-        // 检查收藏状态
+
         [HttpGet("check")]
         public async Task<IActionResult> CheckFavorite(int articleId, string userEmail)
         {

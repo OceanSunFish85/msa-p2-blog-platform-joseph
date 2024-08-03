@@ -16,7 +16,7 @@ namespace backend.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // 增加评论
+        // add comment
         public async Task<Comment> AddCommentAsync(CreateCommentRequest request)
         {
             var comment = new Comment
@@ -35,7 +35,7 @@ namespace backend.Services
             return comment;
         }
 
-        // 获取文章的评论列表
+        //get comments by article id
         public async Task<IEnumerable<CommentListResponse>> GetCommentsByArticleIdAsync(int articleId)
         {
             return await _context.Comments
@@ -57,7 +57,7 @@ namespace backend.Services
                 .ToListAsync();
         }
 
-        // 喜欢评论
+        // like comment
         public async Task<bool> LikeCommentAsync(int commentId)
         {
             var comment = await _context.Comments.FindAsync(commentId);
@@ -68,7 +68,7 @@ namespace backend.Services
             return true;
         }
 
-        // 不喜欢评论
+        // dislike comment
         public async Task<bool> DislikeCommentAsync(int commentId)
         {
             var comment = await _context.Comments.FindAsync(commentId);

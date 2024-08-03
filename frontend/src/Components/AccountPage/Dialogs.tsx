@@ -41,7 +41,6 @@ interface DialogsProps {
 const Dialogs: React.FC<DialogsProps> = ({
   open,
   onClose,
-  selectedFile,
   onFileChange,
   onUpload,
   deleteOpen,

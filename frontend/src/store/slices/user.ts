@@ -23,7 +23,7 @@ export const fetchUserProfile: any = createAsyncThunk<UserBasicInfo>(
   async (_, thunkAPI) => {
     try {
       const user = await getUserBasicInfo();
-      console.log('User:', user);
+      //console.log('User:', user);
       return user;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.message);
@@ -37,7 +37,7 @@ export const updateUserInfoThunk: any = createAsyncThunk<
 >('user/updateUserInfo', async (editProfileRequest, thunkAPI) => {
   try {
     const updatedUser = await updateUserProfile(editProfileRequest);
-    console.log('Updated user:', updatedUser);
+    //console.log('Updated user:', updatedUser);
     return updatedUser;
   } catch (error: any) {
     return thunkAPI.rejectWithValue(error.message);

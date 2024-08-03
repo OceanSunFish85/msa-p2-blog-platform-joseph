@@ -1,5 +1,3 @@
-// FeaturedArticle.stories.tsx
-import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import FeaturedArticle from '../Components/HomePage/FeaturedArticle';
 

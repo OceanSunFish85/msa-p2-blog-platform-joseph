@@ -12,7 +12,6 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material';
 import Quill from 'quill';
-import { useNavigate } from 'react-router-dom';
 import { incrementArticleViewCount } from '../../Services/ArticleService';
 import {
   setSelectedArticleId,
@@ -26,7 +25,6 @@ import {
 } from '../../store/slices/favorite';
 import { useAppDispatch } from '../../store/useAppDispatch';
 import { useAppSelector } from '../../store/useAppSelecter';
-import TableOfContent from '../NewPost/TableofContent';
 import ArticleContent from './ArticleContent';
 import AuthorInfo from './AuthorInfo';
 import ConfirmationDialog from './ConfirmationDialog';
@@ -35,7 +33,6 @@ import ArticleDetailSnack from './ArticleDetailSnack';
 
 const DetailPage: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const articleDetail = useAppSelector((state) => state.article.detail);
   const authorInfo = useAppSelector((state) => state.article.authorInfo);
@@ -48,9 +45,9 @@ const DetailPage: React.FC = () => {
   const isFavorite = useAppSelector((state) => state.favorite.isFavorite);
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-  const [tocOpen, setTocOpen] = useState<boolean>(false);
+  const [, setTocOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
-  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const [, setSettingsOpen] = useState<boolean>(false);
   const [isLoginPrompt, setIsLoginPrompt] = useState<boolean>(false);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -167,9 +164,9 @@ const DetailPage: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={3} sx={{ padding: theme.spacing(2) }}>
+          {/* <Grid item xs={12} md={3} sx={{ padding: theme.spacing(2) }}>
             <ArticleTableContent headings={headings} />
-          </Grid>
+          </Grid> */}
         </Grid>
       </Container>
       <ConfirmationDialog open={confirmOpen} onClose={handleConfirmClose} />

@@ -115,7 +115,7 @@ public class AuthenticateController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // 从 JWT 令牌中获取用户的电子邮件地址
+
         var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
         if (userEmail == null)

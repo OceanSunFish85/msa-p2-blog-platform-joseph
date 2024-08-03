@@ -21,7 +21,7 @@ export const generateSummaryThunk = createAsyncThunk<
 >('ai/generateSummary', async (articleContent: string, { rejectWithValue }) => {
   try {
     const summary = await generateSummary({ Inputs: articleContent });
-    console.log('Summary:', summary);
+    //console.log('Summary:', summary);
     return summary;
   } catch (error: any) {
     return rejectWithValue(error.message);

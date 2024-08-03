@@ -1,5 +1,3 @@
-// ArticleList.stories.tsx
-import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import ArticleList from '../Components/HomePage/ArticleList';
 

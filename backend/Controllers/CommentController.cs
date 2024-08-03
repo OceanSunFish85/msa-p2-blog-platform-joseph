@@ -19,7 +19,7 @@ namespace backend.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // 增加评论
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddComment([FromBody] CreateCommentRequest request)
@@ -39,7 +39,6 @@ namespace backend.Controllers
             }
         }
 
-        // 获取文章的评论列表
         [HttpGet("article/{articleId}")]
         public async Task<IActionResult> GetCommentsByArticleId(int articleId)
         {
@@ -55,7 +54,7 @@ namespace backend.Controllers
             }
         }
 
-        // 喜欢评论
+
         [HttpPost("like/{commentId}")]
         public async Task<IActionResult> LikeComment(int commentId)
         {
@@ -75,7 +74,7 @@ namespace backend.Controllers
             }
         }
 
-        // 不喜欢评论
+
         [HttpPost("dislike/{commentId}")]
         public async Task<IActionResult> DislikeComment(int commentId)
         {

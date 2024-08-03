@@ -12,7 +12,6 @@ import {
   Paper,
   IconButton,
   useTheme,
-  colors,
   Popover,
   InputAdornment,
   Link,
@@ -47,50 +46,50 @@ const ChatComponent: React.FC = () => {
       setIsLoggedIn(false);
       return;
     }
-    // 创建 SignalR 连接
+    // create new connection
     const newConnection = new HubConnectionBuilder()
       .withUrl('http://localhost:5078/chatHub', {
-        accessTokenFactory: () => token, // 将 token 作为访问 token 传递
+        accessTokenFactory: () => token, // pass token to the server
       })
       .configureLogging(LogLevel.Information)
       .build();
     setConnection(newConnection);
 
-    // 处理 SignalR 消息
+    // handle incoming messages
     newConnection.on('ReceiveMessage', (chatMessage: MessageRequest) => {
       setMessages((prevMessages) => [...prevMessages, chatMessage]);
     });
 
     newConnection.on('LoadMessages', (messages: MessageResponse[]) => {
-      // 将 MessageResponse 转换为 MessageRequest
+      // transform messages to MessageRequest type
       const messageRequests: MessageRequest[] = messages.map((msg) => ({
-        type: 'chat', // 设置默认值
+        type: 'chat', // default to chat type
         userName: msg.userName,
         content: msg.content,
-        createdAt: new Date(msg.createdAt), // 转换字符串日期为 Date 对象
+        createdAt: new Date(msg.createdAt), // convert to Date object
       }));
-      // 追加历史消息到当前消息列表
+      // handle incoming messages
       setMessages((prevMessages) => [...messageRequests, ...prevMessages]);
     });
 
-    newConnection.on('Error', (message: string) => {
-      console.error('Error from server: ', message);
-      // 可以显示错误消息给用户
+    newConnection.on('Error', (_message: string) => {
+      //console.error('Error from server: ', message);
+      // show error message
     });
 
-    // 启动连接
+    // start the connection
     newConnection
       .start()
       .then(() => {
         console.log('Connected to SignalR Hub');
-        // 加载历史消息
+        // history message
         newConnection
           .invoke('LoadMessages')
           .catch((err) => console.error('Error while loading messages: ', err));
       })
       .catch((err) => console.error('Error while starting connection: ', err));
 
-    // 清理连接
+    // clear connection on unmount
     return () => {
       newConnection
         .stop()
@@ -100,7 +99,7 @@ const ChatComponent: React.FC = () => {
   }, [token]);
 
   useEffect(() => {
-    // 自动滚动到底部
+    // auto scroll to bottom when new message is received
     scrollToBottom();
   }, [messages]);
 
@@ -116,14 +115,14 @@ const ChatComponent: React.FC = () => {
       try {
         await connection.invoke('SendMessage', chatMessage);
         setMessage('');
-        scrollToBottom(); // 发送消息后滚动到底部
+        scrollToBottom();
       } catch (err) {
         console.error('Error sending message: ', err);
       }
     }
   };
 
-  // 处理表情符号选择
+  // handle emoji click
   const handleEmojiClick = (emoji: any) => {
     const cursorPosition = textFieldRef.current?.selectionStart || 0;
     const newMessage =
@@ -131,7 +130,7 @@ const ChatComponent: React.FC = () => {
       emoji.native +
       message.slice(cursorPosition);
     setMessage(newMessage);
-    setShowPicker(false); // 选择后关闭表情符号选择器
+    setShowPicker(false);
   };
 
   const handlePickerOpen = (event: React.MouseEvent<HTMLElement>) => {

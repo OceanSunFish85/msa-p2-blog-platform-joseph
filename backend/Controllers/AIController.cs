@@ -15,7 +15,9 @@ namespace backend.Controllers
         {
             _aiService = aiService;
         }
+
         [HttpPost("summarize")]
+        //get the article content from the request body and return the summary
         public async Task<IActionResult> Summarize([FromBody] SummarizeRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Inputs))

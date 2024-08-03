@@ -1,5 +1,3 @@
-// FeaturedArticle.tsx
-import React from 'react';
 import {
   Card,
   CardMedia,
@@ -34,7 +32,7 @@ const FeaturedArticle = ({
           variant="rectangular"
           width="100%"
           height={400}
-          animation="wave"
+          animation={false}
           sx={{
             bgcolor: theme.palette.background.default,
             '&::before': {

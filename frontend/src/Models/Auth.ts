@@ -1,3 +1,6 @@
+import { Role } from './enums/Role';
+import { UserStatus } from './enums/UserStatus';
+
 // Objective: Define the interfaces for the authentication module.
 export interface LoginResponse {
   username: string;
@@ -15,4 +18,14 @@ export interface LoginRequest {
 export interface ChangePasswordRequest {
   CurrentPassword: string;
   NewPassword: string;
+}
+// Objective: Define the interfaces for the authentication module.
+export interface RegistrationRequest {
+  email: string;
+  username: string;
+  password: string;
+  role?: Role;
+  createdAt?: string;
+  updatedAt?: string;
+  userStatus?: UserStatus;
 }

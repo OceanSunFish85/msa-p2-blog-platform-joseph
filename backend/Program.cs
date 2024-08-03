@@ -15,8 +15,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 加载配置文件
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+// use SignalR to replace the default WebSocket implementation
 builder.Services.AddSignalR();
 // Add services
 builder.Services.AddControllers();
@@ -183,25 +184,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-
-// app.UseWebSockets();
 app.MapControllers();
 
-// // 使用 app.MapGet 处理 WebSocket 请求
-// app.MapGet("/ws", async (HttpContext context, ChatService chatService) =>
-// {
-//     if (context.WebSockets.IsWebSocketRequest)
-//     {
-//         var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-//         await chatService.HandleWebSocketConnection(webSocket);
-//     }
-//     else
-//     {
-//         context.Response.StatusCode = 400;
-//         await context.Response.WriteAsync("WebSocket connection expected.");
-//     }
-// });
-
+// Add SignalR middleware
 app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

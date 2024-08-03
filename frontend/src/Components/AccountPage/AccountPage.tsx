@@ -49,7 +49,6 @@ const AccountPage: React.FC = () => {
   const [tabValue, setTabValue] = useState<ArticleStatus>(
     ArticleStatus.Published
   );
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const userAvatar = localStorage.getItem('userAvatar');
   const userBio = localStorage.getItem('userBio');
@@ -127,7 +126,6 @@ const AccountPage: React.FC = () => {
 
   const handleArticleClick = (id: number) => {
     dispatch(setSelectedArticleId(id));
-    console.log(`Selected Article ID: ${id}`);
     navigate(`/editPost`);
   };
 
@@ -137,7 +135,7 @@ const AccountPage: React.FC = () => {
   };
 
   const handleTabChange = (
-    event: React.ChangeEvent<{}>,
+    _event: React.ChangeEvent<{}>,
     newValue: ArticleStatus
   ) => {
     setTabValue(newValue);
@@ -152,12 +150,8 @@ const AccountPage: React.FC = () => {
   const handleUpload = async () => {
     if (selectedFile) {
       try {
-        const resultAction = await dispatch(
-          uploadAvatarThunk(selectedFile)
-        ).unwrap();
+        await dispatch(uploadAvatarThunk(selectedFile)).unwrap();
         const avatarUrl = localStorage.getItem('userAvatar');
-
-        console.log('Avatar uploaded:', avatarUrl);
 
         await dispatch(updateUserInfoThunk({ Avatar: avatarUrl })).unwrap();
         await dispatch(fetchUserProfile());
@@ -203,7 +197,6 @@ const AccountPage: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      console.log('Deleting article:', id);
       await dispatch(deleteArticleThunk(id));
       handleDiaClose();
       setSnackbarMessage('Article deleted successfully!');

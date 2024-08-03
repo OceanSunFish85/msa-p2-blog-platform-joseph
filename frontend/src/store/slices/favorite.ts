@@ -58,7 +58,7 @@ export const checkFavoriteThunk: any = createAsyncThunk(
     userEmail: string;
   }) => {
     const isFavorite = await checkFavorite(articleId, userEmail);
-    console.log('Favorite Thunk:', isFavorite);
+    //console.log('Favorite Thunk:', isFavorite);
     return isFavorite;
   }
 );
@@ -101,7 +101,7 @@ const favoriteSlice = createSlice({
       .addCase(checkFavoriteThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.isFavorite = action.payload;
-        console.log('state.isFavorite action:', state.isFavorite);
+        //console.log('state.isFavorite action:', state.isFavorite);
       })
       .addCase(checkFavoriteThunk.rejected, (state) => {
         state.loading = false;

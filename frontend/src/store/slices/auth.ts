@@ -3,8 +3,9 @@ import {
   ChangePasswordRequest,
   LoginRequest,
   LoginResponse,
+  RegistrationRequest,
 } from '../../Models/Auth';
-import AuthService from '../../Services/AuthService';
+import AuthService, { register } from '../../Services/AuthService';
 
 // Define a type for the slice state
 export interface AuthState {
@@ -35,8 +36,8 @@ export const login: any = createAsyncThunk<LoginResponse, LoginRequest>(
   async (credentials, thunkAPI) => {
     try {
       const response = await AuthService.login(credentials);
-      console.log('Login response:', response);
-      console.log('Response Token:', response.token);
+      //console.log('Login response:', response);
+      //console.log('Response Token:', response.token);
       return response;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response.data);
@@ -53,6 +54,18 @@ export const changePasswordThunk: any = createAsyncThunk(
       return response;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const registerUserThunk: any = createAsyncThunk(
+  'auth/registerUser',
+  async (data: RegistrationRequest, { rejectWithValue }) => {
+    try {
+      const response = await register(data);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error);
     }
   }
 );
@@ -110,6 +123,20 @@ const authSlice = createSlice({
         (state, action: PayloadAction<any>) => {
           state.isLoading = false;
           state.error = action.payload;
+        }
+      )
+      .addCase(registerUserThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUserThunk.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(
+        registerUserThunk.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.isLoading = false;
+          state.error = action.payload as string;
         }
       );
   },

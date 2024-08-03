@@ -15,11 +15,11 @@ namespace backend.Hubs
         {
             _messageService = messageService;
         }
-        // 处理接收到的消息并广播给所有连接的客户端
+        // handle message
         public async Task SendMessage(ChatMessage chatMessage)
         {
             var userEmail = Context.User.FindFirstValue(ClaimTypes.Email);
-            Console.WriteLine($"User email: {userEmail}"); // 调试信息
+            Console.WriteLine($"User email: {userEmail}");
             if (userEmail == null)
             {
                 await Clients.Caller.SendAsync("Error", "User email not found.");
@@ -29,7 +29,7 @@ namespace backend.Hubs
             try
             {
                 var message = await _messageService.SendMessageAsync(chatMessage, userEmail);
-                Console.WriteLine($"Message sent saved: {message.Content}"); // 调试信息
+                Console.WriteLine($"Message sent saved: {message.Content}");
                 await Clients.All.SendAsync("ReceiveMessage", chatMessage);
             }
             catch (Exception ex)
@@ -38,14 +38,14 @@ namespace backend.Hubs
             }
         }
 
-        // 加载消息
+        // load messages
         public async Task LoadMessages()
         {
             try
             {
-                // 从服务中获取消息
+                // load messages
                 var messages = await _messageService.LoadTodayMessagesAsync();
-                Console.WriteLine($"Loaded {messages} messages"); // 调试信息
+                Console.WriteLine($"Loaded {messages} messages");
 
                 await Clients.Caller.SendAsync("LoadMessages", messages);
             }

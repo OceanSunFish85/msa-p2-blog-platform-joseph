@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableDefaultContentItems>false</EnableDefaultContentItems> <!-- 禁用默认包含的“Content”项 -->
+    <AssemblyName>JosephBlog</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

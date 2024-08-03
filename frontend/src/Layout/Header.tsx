@@ -14,12 +14,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AddIcon from '@mui/icons-material/Add';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { HowToReg } from '@mui/icons-material';
+import LoginIcon from '@mui/icons-material/Login';
 import {
   useTheme,
   useMediaQuery,
   Drawer,
   List,
-  ListItem,
   ListItemText,
   Box,
   Button,
@@ -162,9 +163,6 @@ const Header: React.FC = () => {
         <MenuItem component={Link} to="/" onClick={toggleDrawer(false)}>
           <ListItemText primary="Home" />
         </MenuItem>
-        <MenuItem component={Link} to="/detail" onClick={toggleDrawer(false)}>
-          <ListItemText primary="Detail" />
-        </MenuItem>
       </List>
     </Drawer>
   );
@@ -248,19 +246,36 @@ const Header: React.FC = () => {
             <IconButton onClick={handleToggleTheme} color="inherit">
               {muiTheme === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
             </IconButton>
-            <IconButton
-              edge="end"
-              aria-label="account of current user"
-              aria-controls="primary-search-account-menu"
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-            <IconButton color="inherit" onClick={handleNewPostClick} edge="end">
-              <AddIcon />
-            </IconButton>
+            {isAuthenticated ? (
+              <IconButton
+                edge="end"
+                aria-label="account of current user"
+                aria-controls="primary-search-account-menu"
+                aria-haspopup="true"
+                onClick={handleProfileMenuOpen}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+            ) : (
+              <>
+                <IconButton color="inherit" component={Link} to="/login">
+                  <LoginIcon />
+                </IconButton>
+                <IconButton color="inherit" component={Link} to="/register">
+                  <HowToReg />
+                </IconButton>
+              </>
+            )}
+            {isAuthenticated && (
+              <IconButton
+                color="inherit"
+                onClick={handleNewPostClick}
+                edge="end"
+              >
+                <AddIcon />
+              </IconButton>
+            )}
             {renderSearchDrawer}
           </>
         ) : (
@@ -292,19 +307,6 @@ const Header: React.FC = () => {
                   }}
                 >
                   <Button sx={{ color: 'inherit' }}>Home</Button>
-                </Link>
-                <Link
-                  to="/detail"
-                  style={{
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    borderBottom:
-                      location.pathname === '/detail'
-                        ? `2px solid ${theme.palette.secondary.main}`
-                        : 'none',
-                  }}
-                >
-                  <Button sx={{ color: 'inherit' }}>Detail</Button>
                 </Link>
               </Box>
             </Grid>
