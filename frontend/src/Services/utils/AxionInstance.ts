@@ -1,6 +1,7 @@
 import axios from 'axios';
 import API_URL from '../../Constants';
 
+// Create an axios instance
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
@@ -8,6 +9,7 @@ const axiosInstance = axios.create({
   },
 });
 
+// Request interceptor for API calls
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,7 +23,7 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
+// Response interceptor for API calls
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;

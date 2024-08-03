@@ -1,18 +1,19 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { generateSummary } from '../../Services/AIService';
 
+// Define a type for the slice state
 export interface AIState {
   summary: string;
   isLoading: boolean;
   error: string | null;
 }
-
+// Define the initial state using that type
 const initialState: AIState = {
   summary: '',
   isLoading: false,
   error: null,
 };
-
+// Define a thunk that dispatches those actions
 export const generateSummaryThunk = createAsyncThunk<
   string,
   string,
@@ -26,7 +27,7 @@ export const generateSummaryThunk = createAsyncThunk<
     return rejectWithValue(error.message);
   }
 });
-
+// Define the slice using the initial state
 const aiSlice = createSlice({
   name: 'ai',
   initialState,

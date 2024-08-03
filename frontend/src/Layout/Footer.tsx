@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
       }}
     >
       <Typography variant="body1">
-        hotcoffee 2020 copyright all rights reserved
+        Joseph 2024 copyright all rights reserved
       </Typography>
       <Box>
         <IconButton aria-label="twitter" color="inherit">

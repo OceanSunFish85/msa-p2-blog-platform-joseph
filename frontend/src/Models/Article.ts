@@ -1,6 +1,8 @@
+import { ArticleSortOption } from './enums/ArticlesSortOption';
 import { ArticleStatus } from './enums/ArticleStatus';
 import { MediaType } from './enums/MediaType';
 
+// Interface for get articles params
 export interface GetArticlesParams {
   pageNumber: number;
   pageSize: number;
@@ -10,6 +12,7 @@ export interface GetArticlesParams {
   searchKey?: string;
 }
 
+// Interface for article media
 export interface ArticleMedia {
   Id?: number;
   Type: MediaType;
@@ -17,7 +20,7 @@ export interface ArticleMedia {
   AltText?: string;
 }
 
-// 新建文章请求数据结构
+// Interface for new article request
 export interface NewArticleRequest {
   Title: string;
   AuthorEmail: string;
@@ -29,6 +32,7 @@ export interface NewArticleRequest {
   Media?: ArticleMedia[];
 }
 
+// Interface for update article request
 export interface UpdateArticleRequest {
   Title: string;
   Summary: string;
@@ -39,13 +43,7 @@ export interface UpdateArticleRequest {
   Media?: ArticleMedia[];
 }
 
-export enum ArticleSortOption {
-  Comments = 'CommentsCount',
-  Views = 'Views',
-  Likes = 'Likes',
-  Date = 'CreatedAt',
-}
-
+// Interface for article list response
 export interface ArticleListResponse {
   id: number;
   title: string;
@@ -60,6 +58,7 @@ export interface ArticleListResponse {
   createdAt: string;
 }
 
+// Interface for article detail response
 export interface ArticleDetailResponse {
   id: number;
   title: string;
@@ -76,10 +75,12 @@ export interface ArticleDetailResponse {
   media?: ArticleMedia[] | null;
 }
 
+// Interface for summarized request
 export interface SummarizedRequest {
   Inputs: string;
 }
 
+// Interface for summarized response
 export interface SummarizedResponse {
   summary_text: string;
 }

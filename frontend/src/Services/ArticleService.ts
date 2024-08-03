@@ -3,13 +3,13 @@ import API_URL from '../Constants';
 import {
   ArticleDetailResponse,
   ArticleListResponse,
-  ArticleSortOption,
   GetArticlesParams,
   NewArticleRequest,
   UpdateArticleRequest,
 } from '../Models/Article';
 import axios from 'axios';
 
+// Create article service
 export const createArticle = async (newArticleRequest: NewArticleRequest) => {
   try {
     const response = await axiosInstance.post(
@@ -29,7 +29,7 @@ export const createArticle = async (newArticleRequest: NewArticleRequest) => {
     throw error;
   }
 };
-// 编辑文章的服务
+// Edit article service
 export const editArticle = async (
   id: number,
   editArticleRequest: UpdateArticleRequest
@@ -52,7 +52,7 @@ export const editArticle = async (
     throw error;
   }
 };
-
+// Delete article service
 export const deleteArticle = async (id: number): Promise<void> => {
   try {
     await axiosInstance.delete(`${API_URL}article/delete-article/${id}`);
@@ -68,7 +68,7 @@ export const deleteArticle = async (id: number): Promise<void> => {
     throw error;
   }
 };
-
+// Get articles service
 export const getArticles = async (
   params: GetArticlesParams
 ): Promise<ArticleListResponse[]> => {
@@ -91,7 +91,7 @@ export const getArticles = async (
     throw error;
   }
 };
-
+// Get user articles service
 export const getUserArticles = async (
   params: GetArticlesParams
 ): Promise<ArticleListResponse[]> => {
@@ -115,7 +115,7 @@ export const getUserArticles = async (
     throw error;
   }
 };
-
+// Get article by id service
 export const getArticleById = async (
   id: number
 ): Promise<ArticleDetailResponse> => {
@@ -130,7 +130,7 @@ export const getArticleById = async (
     throw error;
   }
 };
-
+// Increment article view count service
 export const incrementArticleViewCount = async (articleId: number) => {
   try {
     const response = await axios.post(
@@ -143,7 +143,7 @@ export const incrementArticleViewCount = async (articleId: number) => {
     throw error;
   }
 };
-
+// Handle article like count service
 export const handleArticleLikeCount = async (id: number, action: number) => {
   try {
     const response = await axiosInstance.post(
@@ -156,14 +156,14 @@ export const handleArticleLikeCount = async (id: number, action: number) => {
     throw error;
   }
 };
-
+// Increment article comment count service
 export const incrementCommentsCount = async (articleId: number) => {
   const response = await axios.post(
     `${API_URL}article/increment-comments/${articleId}`
   );
   return response.data;
 };
-
+// Get top articles service
 export const getTopArticles = async () => {
   try {
     const response = await axiosInstance.get<ArticleListResponse[]>(

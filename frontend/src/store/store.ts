@@ -6,9 +6,8 @@ import uploadSlice from './slices/upload';
 import aiSlice from './slices/ai';
 import articleSlice from './slices/article';
 import favoriteSlice from './slices/favorite';
-import searchSlice from './slices/search';
 import commentSlice from './slices/comment';
-
+// Create a store with the slices
 export const store = configureStore({
   reducer: {
     global: globalSlice.reducer,
@@ -18,7 +17,7 @@ export const store = configureStore({
     ai: aiSlice.reducer,
     article: articleSlice.reducer,
     favorite: favoriteSlice.reducer,
-    search: searchSlice.reducer,
+
     comment: commentSlice.reducer,
   },
 });

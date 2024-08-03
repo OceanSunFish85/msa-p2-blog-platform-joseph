@@ -5,20 +5,21 @@ import {
   removeFavorite,
 } from '../../Services/FavoriteService';
 
+// Define a type for the slice state
 export interface FavoriteState {
   favorites: number[];
   isFavorite: boolean;
   loading: boolean;
   error: string | null;
 }
-
+// Define the initial state using that type
 const initialState: FavoriteState = {
   favorites: [],
   isFavorite: false,
   loading: false,
   error: null,
 };
-
+// Define a thunk that dispatches those actions
 export const addFavoriteThunk: any = createAsyncThunk(
   'favorite/addFavorite',
   async ({
@@ -32,7 +33,7 @@ export const addFavoriteThunk: any = createAsyncThunk(
     return articleId;
   }
 );
-
+// Define a thunk that dispatches those actions
 export const removeFavoriteThunk: any = createAsyncThunk(
   'favorite/removeFavorite',
   async ({
@@ -46,7 +47,7 @@ export const removeFavoriteThunk: any = createAsyncThunk(
     return articleId;
   }
 );
-
+// Define a thunk that dispatches those actions
 export const checkFavoriteThunk: any = createAsyncThunk(
   'favorite/chectFavorite',
   async ({
@@ -61,7 +62,7 @@ export const checkFavoriteThunk: any = createAsyncThunk(
     return isFavorite;
   }
 );
-
+// Define the slice using the initial state
 const favoriteSlice = createSlice({
   name: 'favorite',
   initialState,
@@ -99,7 +100,7 @@ const favoriteSlice = createSlice({
       })
       .addCase(checkFavoriteThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.isFavorite = action.payload; // 确保设置为布尔值
+        state.isFavorite = action.payload;
         console.log('state.isFavorite action:', state.isFavorite);
       })
       .addCase(checkFavoriteThunk.rejected, (state) => {

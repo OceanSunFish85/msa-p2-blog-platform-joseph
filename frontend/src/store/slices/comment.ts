@@ -8,21 +8,21 @@ import {
 import { CommentListResponse } from '../../Models/Comments';
 import { RootState } from '../store';
 
-// 定义状态接口
+// define the state type
 export interface CommentState {
   comments: CommentListResponse[];
   loading: boolean;
   error: string | null;
 }
 
-// 定义初始状态
+// define the initial state
 const initialState: CommentState = {
   comments: [],
   loading: false,
   error: null,
 };
 
-// 创建异步操作：添加评论
+// create async operations: add comment
 export const addCommentThunk: any = createAsyncThunk(
   'comments/addComment',
   async ({ articleId, content }: { articleId: number; content: string }) => {
@@ -31,7 +31,7 @@ export const addCommentThunk: any = createAsyncThunk(
   }
 );
 
-// 创建异步操作：获取文章的评论列表
+// create async operations: get comments by article id
 export const getCommentsByArticleIdThunk: any = createAsyncThunk(
   'comments/getCommentsByArticleId',
   async (articleId: number): Promise<CommentListResponse[]> => {
@@ -39,7 +39,7 @@ export const getCommentsByArticleIdThunk: any = createAsyncThunk(
     return response;
   }
 );
-
+// create async operations: like comment
 export const likeCommentThunk: any = createAsyncThunk(
   'comments/likeComment',
   async (commentId: number) => {
@@ -47,7 +47,7 @@ export const likeCommentThunk: any = createAsyncThunk(
     return commentId;
   }
 );
-
+// create async operations: dislike comment
 export const dislikeCommentThunk: any = createAsyncThunk(
   'comments/dislikeComment',
   async (commentId: number) => {
@@ -56,11 +56,11 @@ export const dislikeCommentThunk: any = createAsyncThunk(
   }
 );
 
-// 创建 commentSlice
 const commentSlice = createSlice({
   name: 'comments',
   initialState,
   reducers: {
+    // like comment
     likeComment: (state, action: PayloadAction<number>) => {
       const comment = state.comments.find(
         (comment) => comment.id === action.payload
@@ -69,6 +69,7 @@ const commentSlice = createSlice({
         comment.likes += 1;
       }
     },
+    // dislike comment
     dislikeComment: (state, action: PayloadAction<number>) => {
       const comment = state.comments.find(
         (comment) => comment.id === action.payload
@@ -80,7 +81,7 @@ const commentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // 添加评论
+
       .addCase(addCommentThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -93,7 +94,7 @@ const commentSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to add comment';
       })
-      // 获取文章的评论列表
+
       .addCase(getCommentsByArticleIdThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -103,7 +104,7 @@ const commentSlice = createSlice({
         state.comments = action.payload.sort(
           (a: CommentListResponse, b: CommentListResponse) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
+        ); // sort comments by createdAt
       })
       .addCase(getCommentsByArticleIdThunk.rejected, (state, action) => {
         state.loading = false;
@@ -118,7 +119,7 @@ const commentSlice = createSlice({
           if (comment) {
             comment.likes += 1;
           }
-        }
+        } // like comment count
       )
       .addCase(
         dislikeCommentThunk.fulfilled,
@@ -130,7 +131,7 @@ const commentSlice = createSlice({
             comment.dislikes += 1;
           }
         }
-      );
+      ); // dislike comment count
   },
 });
 export const { likeComment, dislikeComment } = commentSlice.actions;

@@ -1,6 +1,7 @@
 import API_URL from '../Constants';
 import axiosInstance from './utils/AxionInstance';
 
+// Add favorite
 export const addFavorite = async (articleId: number, userEmail: string) => {
   try {
     const response = await axiosInstance.post(`${API_URL}favorites/add`, null, {
@@ -13,6 +14,7 @@ export const addFavorite = async (articleId: number, userEmail: string) => {
   }
 };
 
+// Remove favorite
 export const removeFavorite = async (articleId: number, userEmail: string) => {
   try {
     const response = await axiosInstance.delete(`${API_URL}favorites/remove`, {
@@ -25,6 +27,7 @@ export const removeFavorite = async (articleId: number, userEmail: string) => {
   }
 };
 
+// Check favorite
 export const checkFavorite = async (
   articleId: number,
   userEmail: string

@@ -12,18 +12,16 @@ import {
 import { useSelector } from 'react-redux';
 
 import Header from './Layout/Header';
-import HomePage from './Components/HomePage';
+import HomePage from './Components/HomePage/Home';
 import { lightTheme, darkTheme } from './theme/theme';
 import GlobalStyle from './theme/globalStyles';
 import { RootState } from './store/store';
 import Footer from './Layout/Footer';
-import AccountPage from './Components/AccountPage';
-import DetailPage from './Components/DetailPage';
-import NewPost from './Components/NewPost';
 import LoginPage from './Components/LoginPage';
-import GlobalSpin from './Components/GlobalSpin';
-import GlobalSkeleton from './Components/GlobalSkeleton';
-import EditArticle from './Components/EditArticle';
+import NewPost from './Components/NewPost/NewPostPage';
+import EditArticle from './Components/EditArticle/EditArticle';
+import DetailPage from './Components/ArticleDetail/ArticleDetail';
+import AccountPage from './Components/AccountPage/AccountPage';
 
 const App: React.FC = () => {
   const theme = useSelector((state: RootState) => state.global.theme);
@@ -38,7 +36,7 @@ const App: React.FC = () => {
           sx={{
             width: '100%',
             minHeight: '100vh',
-            backgroundColor: muiTheme.palette.background.default, // 设置背景颜色为主题的背景默认颜色
+            backgroundColor: muiTheme.palette.background.default,
             display: 'flex',
             flexDirection: 'column',
           }}
@@ -47,17 +45,13 @@ const App: React.FC = () => {
           <Container maxWidth="xl" sx={{ flex: '1 0 auto' }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <GlobalSpin />
-                <GlobalSkeleton />
                 <Routes>
-                  <Route path="/" element={<HomePage />} /> {/* 默认页面 */}
+                  <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/account" element={<AccountPage />} />{' '}
                   <Route path="/detail" element={<DetailPage />} />{' '}
                   <Route path="/newPost" element={<NewPost />} />{' '}
                   <Route path="/editPost" element={<EditArticle />} />
-                  {/* 默认页面 */}
-                  {/* Add other routes here */}
                 </Routes>
               </Grid>
             </Grid>
