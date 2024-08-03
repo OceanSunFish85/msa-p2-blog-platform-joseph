@@ -1,4 +1,3 @@
-// HomePage.tsx
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -75,7 +74,7 @@ const HomePage: React.FC = () => {
   }, [sortOption, sortOrder, dispatch, searchKey, searchMessage, currentPage]);
 
   const handleTabOnChange = (
-    event: React.ChangeEvent<{}>,
+    _event: React.ChangeEvent<{}>,
     newValue: number
   ) => {
     setTabValue(newValue);

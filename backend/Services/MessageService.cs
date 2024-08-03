@@ -14,7 +14,7 @@ namespace backend.Services
             _context = context;
         }
 
-        // 加载今天之内的所有消息列表
+        // load messages
         public async Task<List<Message>> LoadTodayMessagesAsync()
         {
             var today = DateTime.UtcNow.Date;
@@ -23,7 +23,7 @@ namespace backend.Services
                 .ToListAsync();
         }
 
-        // 发送消息，接收email和content然后将他们存储
+        // send message
         public async Task<Message> SendMessageAsync(ChatMessage chatMessage, string email)
         {
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SummarizedRequest, SummarizedResponse } from '../Models/Article';
+import { SummarizedRequest } from '../Models/Article';
 import API_URL from '../Constants';
 
 // Generate a ai summary of the article

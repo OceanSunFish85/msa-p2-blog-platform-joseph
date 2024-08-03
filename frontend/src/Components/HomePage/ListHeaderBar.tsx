@@ -1,4 +1,3 @@
-// ListHeaderBar.tsx
 import React from 'react';
 import {
   AppBar,
@@ -9,7 +8,6 @@ import {
   Menu,
   MenuItem,
   useTheme,
-  Divider,
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';

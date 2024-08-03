@@ -22,6 +22,7 @@ import NewPost from './Components/NewPost/NewPostPage';
 import EditArticle from './Components/EditArticle/EditArticle';
 import DetailPage from './Components/ArticleDetail/ArticleDetail';
 import AccountPage from './Components/AccountPage/AccountPage';
+import RegisterPage from './Components/RegisterPage';
 
 const App: React.FC = () => {
   const theme = useSelector((state: RootState) => state.global.theme);
@@ -52,6 +53,7 @@ const App: React.FC = () => {
                   <Route path="/detail" element={<DetailPage />} />{' '}
                   <Route path="/newPost" element={<NewPost />} />{' '}
                   <Route path="/editPost" element={<EditArticle />} />
+                  <Route path="/register" element={<RegisterPage />} />
                 </Routes>
               </Grid>
             </Grid>

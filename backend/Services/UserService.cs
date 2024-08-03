@@ -79,7 +79,7 @@ namespace backend.Services
 
             _logger.LogInformation("User profile updated: {User}", user);
 
-            // 返回 UserBasicInfo 对象
+            // return updated user
             return new UserBasicInfo
             {
                 Id = user.Id,

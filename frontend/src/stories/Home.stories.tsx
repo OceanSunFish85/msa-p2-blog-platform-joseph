@@ -1,9 +1,7 @@
-// HomePage.stories.tsx
-import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import HomePage from '../Components/HomePage/Home'; // 确保路径正确
+import HomePage from '../Components/HomePage/Home';
 import { createMockStore } from '../store/createMockStore';
 
 const initialState = {

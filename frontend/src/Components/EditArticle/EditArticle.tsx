@@ -263,7 +263,7 @@ const EditArticle: React.FC = () => {
 
       const images = extractImagesFromDelta(delta);
       const blobs = images
-        .map((image, index) => {
+        .map((image, _index) => {
           if (isValidBase64(image)) {
             return dataURLToBlob(image);
           } else {

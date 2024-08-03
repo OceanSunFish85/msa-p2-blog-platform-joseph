@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5078:8080"
+    networks:
+      - app-network
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=tcp:msap2softjc.database.windows.net,1433;Initial Catalog=msap2softdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default
+
+networks:
+  app-network:
+    driver: bridge

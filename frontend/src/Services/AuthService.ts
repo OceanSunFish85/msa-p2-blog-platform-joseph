@@ -4,6 +4,7 @@ import {
   ChangePasswordRequest,
   LoginRequest,
   LoginResponse,
+  RegistrationRequest,
 } from '../Models/Auth';
 import axiosInstance from './utils/AxionInstance';
 // Login service
@@ -21,6 +22,16 @@ const changePassword = async (data: ChangePasswordRequest) => {
     data
   );
   return response.data;
+};
+
+// register service
+export const register = async (data: RegistrationRequest) => {
+  try {
+    const response = await axios.post(`${API_URL}authenticate/register`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 const AuthService = {

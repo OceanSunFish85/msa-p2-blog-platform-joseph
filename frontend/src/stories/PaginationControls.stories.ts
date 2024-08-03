@@ -1,5 +1,3 @@
-// PaginationControls.stories.tsx
-import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import PaginationControls from '../Components/HomePage/PaginationControls';
 

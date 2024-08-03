@@ -25,7 +25,7 @@ public class ArticleController : ControllerBase
     [HttpPost("new-article")]
     public async Task<ActionResult<int>> CreateArticle(NewArticleRequest newArticleRequest)
     {
-        // 从 JWT 令牌中获取用户的电子邮件地址
+        // get user email from the token
         var userEmail = User.FindFirstValue(ClaimTypes.Email);
         _logger.LogInformation("User Email from token: {UserEmail}", userEmail);
         if (userEmail != null)
@@ -40,7 +40,7 @@ public class ArticleController : ControllerBase
     [HttpPut("edit-article/{id}")]
     public async Task<IActionResult> EditArticle(int id, EditArticleRequest editArticleRequest)
     {
-        // 从 JWT 令牌中获取用户的电子邮件地址
+
         var userEmail = User.FindFirstValue(ClaimTypes.Email);
         _logger.LogInformation("User Email from token: {UserEmail}", userEmail);
 

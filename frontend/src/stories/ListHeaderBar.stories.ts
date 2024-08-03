@@ -1,5 +1,3 @@
-// ListHeaderBar.stories.tsx
-import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import ListHeaderBar from '../Components/HomePage/ListHeaderBar';
 import { ArticleSortOption } from '../Models/enums/ArticlesSortOption';
@@ -52,7 +50,7 @@ export const Default: Story = {
     tabValue: 0,
     sortOrder: 'asc',
     filterAnchorEl: null,
-    handleTabOnChange: (event, newValue) =>
+    handleTabOnChange: (_event, newValue) =>
       console.log('Tab changed:', newValue),
     handleSortOrderClick: () => console.log('Sort order clicked'),
     handleFilterClick: (event) =>

@@ -11,7 +11,7 @@ namespace backend.Models
         public DateTime UpdatedAt { get; set; }
         public string? Avatar { get; set; }
         public string? Bio { get; set; }
-        public UserStatus UserStatus { get; set; }  // 使用 UserStatus 枚举
+        public UserStatus UserStatus { get; set; }
         public Role? Role { get; set; }
 
     }

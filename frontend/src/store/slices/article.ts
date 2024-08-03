@@ -67,7 +67,7 @@ export const getArticlesThunk: any = createAsyncThunk<
   GetArticlesParams
 >('articles/getArticles', async (params) => {
   const response = await getArticles(params);
-  console.log('response:', response);
+  //console.log('response:', response);
   return response;
 });
 // Define a thunk that dispatches those actions
@@ -128,7 +128,7 @@ const articleSlice = createSlice({
     // Set search message
     setSearchMessage: (state, action: PayloadAction<string>) => {
       state.searchMessage = action.payload;
-      console.log('state.searchMessage:', state.searchMessage);
+      //console.log('state.searchMessage:', state.searchMessage);
     },
   },
   extraReducers: (builder) => {
@@ -153,7 +153,7 @@ const articleSlice = createSlice({
       })
       .addCase(getArticlesThunk.fulfilled, (state, action) => {
         state.articles = action.payload;
-        console.log('state.articles:', state.articles);
+        //console.log('state.articles:', state.articles);
         state.loading = false;
       })
       .addCase(getArticlesThunk.rejected, (state, action) => {
@@ -167,7 +167,7 @@ const articleSlice = createSlice({
       })
       .addCase(getUserArticlesThunk.fulfilled, (state, action) => {
         state.userArticles = action.payload;
-        console.log('state.articles:', state.userArticles);
+        //console.log('state.articles:', state.userArticles);
         state.loading = false;
       })
       .addCase(getUserArticlesThunk.rejected, (state, action) => {
@@ -195,7 +195,7 @@ const articleSlice = createSlice({
       .addCase(getAuthorInfoThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.authorInfo = action.payload;
-        console.log('state.authorInfo:', state.authorInfo);
+        //console.log('state.authorInfo:', state.authorInfo);
       })
       .addCase(getAuthorInfoThunk.rejected, (state, action) => {
         state.loading = false;
@@ -218,7 +218,7 @@ const articleSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteArticleThunk.fulfilled, (state, action) => {
+      .addCase(deleteArticleThunk.fulfilled, (state, _action) => {
         state.loading = false;
       })
       .addCase(deleteArticleThunk.rejected, (state, action) => {

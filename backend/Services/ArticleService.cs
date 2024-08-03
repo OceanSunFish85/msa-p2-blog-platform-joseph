@@ -23,7 +23,7 @@ namespace backend.Services
             {
                 try
                 {
-                    // 创建并保存文章内容
+                    // create and save article content
                     var articleContent = new ArticleContent
                     {
                         HtmlContent = newArticleRequest.HtmlContent
@@ -31,7 +31,7 @@ namespace backend.Services
                     _context.ArticleContents.Add(articleContent);
                     await _context.SaveChangesAsync();
 
-                    // 创建并保存文章
+                    // create and save article
                     var article = new Article
                     {
                         Title = newArticleRequest.Title,
@@ -50,7 +50,7 @@ namespace backend.Services
                     _context.Articles.Add(article);
                     await _context.SaveChangesAsync();
 
-                    // 创建并保存文章媒体
+                    // create and save article media
                     if (newArticleRequest.Media != null)
                     {
                         foreach (var mediaDto in newArticleRequest.Media)
@@ -68,16 +68,16 @@ namespace backend.Services
                         await _context.SaveChangesAsync();
                     }
 
-                    // 提交事务
+                    // save changes to the database
                     await transaction.CommitAsync();
 
                     return article.Id;
                 }
                 catch (Exception ex)
                 {
-                    // 回滚事务
+                    // catch any exception and rollback the transaction
                     await transaction.RollbackAsync();
-                    // 记录异常
+                    // record the exception
                     // Log.Error(ex, "Error creating article");
                     throw;
                 }
@@ -90,7 +90,7 @@ namespace backend.Services
             {
                 try
                 {
-                    // 获取文章
+                    // get article
                     var article = await _context.Articles.FirstOrDefaultAsync(a => a.Id == id);
 
                     if (article == null)
@@ -98,21 +98,21 @@ namespace backend.Services
                         return false;
                     }
 
-                    // 获取文章内容
+                    // get article content
                     var articleContent = await _context.ArticleContents.FirstOrDefaultAsync(c => c.Id == article.ContentId);
                     if (articleContent == null)
                     {
                         return false;
                     }
 
-                    // 更新文章内容
+                    // update article content
                     if (!string.IsNullOrEmpty(editArticleRequest.HtmlContent))
                     {
                         articleContent.HtmlContent = editArticleRequest.HtmlContent;
                         _context.ArticleContents.Update(articleContent);
                     }
 
-                    // 更新文章元数据
+                    // update article
                     if (!string.IsNullOrEmpty(editArticleRequest.Title))
                     {
                         article.Title = editArticleRequest.Title;
@@ -138,16 +138,16 @@ namespace backend.Services
                     _context.Articles.Update(article);
                     await _context.SaveChangesAsync();
 
-                    // 提交事务
+                    // save changes to the database
                     await transaction.CommitAsync();
 
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    // 回滚事务
+                    // catch any exception and rollback the transaction
                     await transaction.RollbackAsync();
-                    // 记录异常
+                    // record the exception
                     _logger.LogError(ex, "Error editing article");
                     throw;
                 }
@@ -160,7 +160,7 @@ namespace backend.Services
             {
                 try
                 {
-                    // 获取文章
+                    // get article
                     var article = await _context.Articles
                         .FirstOrDefaultAsync(a => a.Id == articleId && a.AuthorEmail == userEmail);
 
@@ -169,14 +169,14 @@ namespace backend.Services
                         return false;
                     }
 
-                    // 删除文章内容
+                    // delete article content
                     var content = await _context.ArticleContents.FindAsync(article.ContentId);
                     if (content != null)
                     {
                         _context.ArticleContents.Remove(content);
                     }
 
-                    // 删除文章媒体
+                    // delete article media
                     var mediaList = await _context.ArticleMedias
                         .Where(m => m.ArticleId == articleId)
                         .ToListAsync();
@@ -185,7 +185,7 @@ namespace backend.Services
                         _context.ArticleMedias.RemoveRange(mediaList);
                     }
 
-                    // 删除文章元数据
+                    // delete article
                     _context.Articles.Remove(article);
 
                     await _context.SaveChangesAsync();
@@ -208,7 +208,7 @@ namespace backend.Services
 
         public async Task<ArticleDetailResponse?> GetArticleByIdAsync(int id)
         {
-            // 获取文章及其内容
+            // get article by id
             var article = await _context.Articles
                 .SingleOrDefaultAsync(a => a.Id == id);
 
