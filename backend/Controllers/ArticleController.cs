@@ -166,4 +166,11 @@ public class ArticleController : ControllerBase
         var articles = _articleService.GetUserArticles(userEmail, status, searchKey, pageNumber, pageSize, sortBy, sortOrder);
         return Ok(articles);
     }
+
+    [HttpGet("top-articles")]
+    public IActionResult GetTopArticles(int topCount = 1)
+    {
+        var articles = _articleService.GetTopArticles(topCount);
+        return Ok(articles);
+    }
 }

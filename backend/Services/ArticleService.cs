@@ -464,6 +464,28 @@ namespace backend.Services
             return pagedArticles;
         }
 
+        public List<ArticleListResponse> GetTopArticles(int topCount)
+        {
+            return _context.Articles
+                           .Where(a => !string.IsNullOrEmpty(a.Summary) && !string.IsNullOrEmpty(a.Cover))
+                           .OrderByDescending(a => a.Views)
+                           .Take(topCount)
+                           .Select(a => new ArticleListResponse
+                           {
+                               Id = a.Id,
+                               Title = a.Title,
+                               AuthorEmail = a.AuthorEmail,
+                               Summary = a.Summary,
+                               Cover = a.Cover,
+                               CategoryId = a.CategoryId,
+                               Status = a.Status,
+                               Views = a.Views,
+                               CommentsCount = a.CommentsCount,
+                               Likes = a.Likes,
+                               CreatedAt = a.CreatedAt
+                           })
+                           .ToList();
+        }
     }
 
 }

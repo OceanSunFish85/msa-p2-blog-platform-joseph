@@ -12,6 +12,7 @@ import {
   editArticle,
   getArticleById,
   getArticles,
+  getTopArticles,
   getUserArticles,
 } from '../../Services/ArticleService';
 import { getAuthorInfoByArticleId } from '../../Services/UserService';
@@ -23,6 +24,7 @@ export interface ArticleState {
   detail: any;
   authorInfo: any;
   searchMessage: string | '';
+  topArticles: any[];
   loading: boolean;
   error: string | null;
   selectedId?: number | null;
@@ -34,6 +36,7 @@ const initialState: ArticleState = {
   detail: null,
   authorInfo: null,
   searchMessage: '',
+  topArticles: [],
   loading: false,
   error: null,
   selectedId: null,
@@ -101,6 +104,14 @@ export const getAuthorInfoThunk: any = createAsyncThunk(
   'article/fetchAuthorInfo',
   async (authorId: number) => {
     const response = await getAuthorInfoByArticleId(authorId);
+    return response;
+  }
+);
+
+export const getTopArticlesThunk: any = createAsyncThunk(
+  'articles/getTopArticles',
+  async () => {
+    const response = await getTopArticles();
     return response;
   }
 );
@@ -213,6 +224,19 @@ const articleSlice = createSlice({
       .addCase(deleteArticleThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to delete article';
+      });
+    builder
+      .addCase(getTopArticlesThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getTopArticlesThunk.fulfilled, (state, action) => {
+        state.topArticles = action.payload;
+        state.loading = false;
+      })
+      .addCase(getTopArticlesThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch top articles';
       });
   },
 });
