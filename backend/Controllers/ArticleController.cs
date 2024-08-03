@@ -99,9 +99,10 @@ public class ArticleController : ControllerBase
     int pageNumber = 1,
     int pageSize = 10,
     string sortBy = ArticleSortOption.Date,
-    string sortOrder = "desc")
+    string sortOrder = "desc",
+    string searchKey = null)
     {
-        var articles = _articleService.GetArticles(pageNumber, pageSize, sortBy, sortOrder);
+        var articles = _articleService.GetArticles(pageNumber, pageSize, sortBy, sortOrder, searchKey);
         return Ok(articles);
     }
 

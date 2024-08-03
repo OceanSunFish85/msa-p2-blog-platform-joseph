@@ -22,6 +22,7 @@ export interface ArticleState {
   userArticles: any[];
   detail: any;
   authorInfo: any;
+  searchMessage: string | '';
   loading: boolean;
   error: string | null;
   selectedId?: number | null;
@@ -32,6 +33,7 @@ const initialState: ArticleState = {
   userArticles: [],
   detail: null,
   authorInfo: null,
+  searchMessage: '',
   loading: false,
   error: null,
   selectedId: null,
@@ -58,19 +60,14 @@ export const updateArticleThunk: any = createAsyncThunk(
   }
 );
 
-export const getArticlesThunk: any = createAsyncThunk(
-  'articles/getArticles',
-  async (params: {
-    pageNumber: number;
-    pageSize: number;
-    sortBy: ArticleSortOption;
-    sortOrder: 'asc' | 'desc';
-  }) => {
-    const response = await getArticles(params);
-    console.log('response:', response);
-    return response;
-  }
-);
+export const getArticlesThunk: any = createAsyncThunk<
+  ArticleListResponse[],
+  GetArticlesParams
+>('articles/getArticles', async (params) => {
+  const response = await getArticles(params);
+  console.log('response:', response);
+  return response;
+});
 
 export const getUserArticlesThunk: any = createAsyncThunk<
   ArticleListResponse[],
@@ -116,6 +113,10 @@ const articleSlice = createSlice({
     setSelectedArticleId: (state, action: PayloadAction<number>) => {
       state.selectedId = action.payload;
       localStorage.setItem('selectedArticleId', action.payload.toString());
+    },
+    setSearchMessage: (state, action: PayloadAction<string>) => {
+      state.searchMessage = action.payload;
+      console.log('state.searchMessage:', state.searchMessage);
     },
   },
   extraReducers: (builder) => {
@@ -217,5 +218,5 @@ const articleSlice = createSlice({
 });
 
 // 导出 reducer
-export const { setSelectedArticleId } = articleSlice.actions;
+export const { setSelectedArticleId, setSearchMessage } = articleSlice.actions;
 export default articleSlice;

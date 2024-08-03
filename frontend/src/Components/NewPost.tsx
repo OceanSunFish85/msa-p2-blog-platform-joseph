@@ -387,7 +387,10 @@ const NewPost: React.FC = () => {
                 overflow: 'auto',
               }}
             >
-              <div ref={quillRef} style={{ height: '90%', width: '100%' }} />
+              <div
+                ref={quillRef}
+                style={{ height: isMobile ? '70%' : '90%', width: '100%' }}
+              />
             </Box>
           </Grid>
 
@@ -677,7 +680,11 @@ const NewPost: React.FC = () => {
             open={tocOpen}
             onClose={() => setTocOpen(false)}
             sx={{
-              '& .MuiDrawer-paper': { padding: 2, borderRadius: '8px 8px 0 0' },
+              '& .MuiDrawer-paper': {
+                padding: 2,
+                borderRadius: '8px 8px 0 0',
+                backgroundColor: theme.palette.background.default,
+              },
             }}
           >
             <Typography variant="h6">目录</Typography>
@@ -688,63 +695,190 @@ const NewPost: React.FC = () => {
             open={settingsOpen}
             onClose={() => setSettingsOpen(false)}
             sx={{
-              '& .MuiDrawer-paper': { padding: 2, borderRadius: '8px 8px 0 0' },
+              '& .MuiDrawer-paper': {
+                padding: 2,
+                borderRadius: '8px 8px 0 0',
+                backgroundColor: theme.palette.background.default,
+              },
             }}
           >
-            <Typography variant="h6">文章设置</Typography>
+            <Typography variant="h6">Article Setting</Typography>
             <Box component="form" noValidate autoComplete="off">
-              <TextField
-                fullWidth
-                label="文章标签"
-                variant="outlined"
-                margin="normal"
-                InputLabelProps={{
-                  style: { color: theme.palette.text.primary },
+              <Box
+                onClick={handleChangeCoverClick}
+                sx={{
+                  border: '2px dashed',
+                  borderColor: 'secondary.main',
+                  borderRadius: 1,
+                  p: 2,
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  height: '200px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'transparent',
+                  '&:hover #upload-button-label': {
+                    display: 'block',
+                  },
                 }}
-                InputProps={{ style: { color: theme.palette.text.primary } }}
-              />
-              <TextField
-                fullWidth
-                label="文章封面"
-                variant="outlined"
-                margin="normal"
-                InputLabelProps={{
-                  style: { color: theme.palette.text.primary },
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  id="upload-button"
+                  onChange={handleCoverChange}
+                />
+                <label
+                  htmlFor="upload-button"
+                  id="upload-button-label"
+                  style={{
+                    display: 'none',
+                    position: 'absolute',
+                    zIndex: 2,
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <Button variant="contained" component="span">
+                    {coverPreview ? 'Change Cover' : 'Upload Cover'}
+                  </Button>
+                </label>
+                {coverPreview ? (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      zIndex: 1,
+                    }}
+                  >
+                    <img
+                      src={coverPreview}
+                      alt="Cover Preview"
+                      style={{ maxWidth: '100%', height: 'auto' }}
+                    />
+                  </Box>
+                ) : (
+                  <Typography variant="h6" color="textSecondary">
+                    Upload Cover
+                  </Typography>
+                )}
+              </Box>
+              <Box position="relative">
+                <TextField
+                  fullWidth
+                  label="Summary"
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                  margin="normal"
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  InputLabelProps={{
+                    sx: {
+                      color: theme.palette.text.primary,
+                      '&.Mui-focused': {
+                        color: theme.palette.secondary.main,
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    sx: {
+                      color: theme.palette.text.primary,
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: theme.palette.text.secondary,
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: theme.palette.secondary.main,
+                      },
+                    },
+                  }}
+                />
+                <IconButton
+                  onClick={handleGenerateSummary}
+                  sx={{
+                    position: 'absolute',
+                    right: 8,
+                    bottom: 8,
+                    color: theme.palette.secondary.main,
+                  }}
+                >
+                  <SummarizeIcon />
+                </IconButton>
+              </Box>
+              <FormHelperText
+                sx={{
+                  color: theme.palette.secondary.main,
+                  textAlign: 'right',
                 }}
-                InputProps={{ style: { color: theme.palette.text.primary } }}
-              />
-              <TextField
-                fullWidth
-                label="文章摘要"
-                variant="outlined"
-                multiline
-                rows={4}
-                margin="normal"
-                InputLabelProps={{
-                  style: { color: theme.palette.text.primary },
-                }}
-                InputProps={{ style: { color: theme.palette.text.primary } }}
-              />
+              >
+                Click on the icon to use the AI summary
+              </FormHelperText>
               <FormControl fullWidth variant="outlined" margin="normal">
                 <InputLabel
                   id="privacy-select-label"
-                  style={{ color: theme.palette.text.primary }}
+                  sx={{
+                    color: theme.palette.text.primary,
+                    '&.Mui-focused': {
+                      color: theme.palette.secondary.main,
+                    },
+                  }}
                 >
-                  隐私设置
+                  Privacy Settings
                 </InputLabel>
                 <Select
                   labelId="privacy-select-label"
                   id="privacy-select"
                   value={privacy}
                   onChange={handlePrivacyChange}
-                  label="隐私设置"
-                  style={{ color: theme.palette.text.primary }}
+                  label="Privacy Settings"
+                  sx={{
+                    color: theme.palette.text.primary,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.text.secondary,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.secondary.main,
+                    },
+                    '& .MuiSelect-select': {
+                      backgroundColor: theme.palette.background.default,
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: theme.palette.background.default,
+                        '& .MuiMenuItem-root': {
+                          '&:hover': {
+                            color: theme.palette.background.default,
+                            backgroundColor: theme.palette.secondary.main,
+                          },
+                        },
+                      },
+                    },
+                  }}
                 >
-                  <MenuItem value="public">公开</MenuItem>
-                  <MenuItem value="private">私密</MenuItem>
+                  <MenuItem value={ArticleStatus.Published}>Published</MenuItem>
+                  <MenuItem value={ArticleStatus.Archived}>Private</MenuItem>
+                  <MenuItem value={ArticleStatus.Draft}>Draft</MenuItem>
                 </Select>
-                <FormHelperText style={{ color: theme.palette.secondary.main }}>
-                  选择文章的隐私设置
+                <FormHelperText
+                  sx={{
+                    color: theme.palette.secondary.main,
+                    textAlign: 'right',
+                  }}
+                >
+                  Article Privacy Selection
                 </FormHelperText>
               </FormControl>
               <Box
@@ -754,22 +888,25 @@ const NewPost: React.FC = () => {
                   marginTop: 2,
                 }}
               >
-                <Button variant="contained" color="primary">
-                  保存草稿
-                </Button>
                 <Button
                   variant="contained"
                   color="secondary"
                   onClick={handleSubmit}
+                  sx={{
+                    typography: 'caption', // 设置较小的字体大小
+                  }}
                 >
-                  发布文章
+                  Publish
                 </Button>
                 <Button
                   variant="contained"
                   color="inherit"
                   onClick={handlePreviewOpen}
+                  sx={{
+                    typography: 'caption', // 设置较小的字体大小
+                  }}
                 >
-                  预览
+                  Preview
                 </Button>
               </Box>
             </Box>

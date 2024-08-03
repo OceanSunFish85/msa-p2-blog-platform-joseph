@@ -77,6 +77,7 @@ export const getArticles = async (
       `${API_URL}article/articles`,
       {
         params: {
+          searchKey: params.searchKey,
           pageNumber: params.pageNumber,
           pageSize: params.pageSize,
           sortBy: params.sortBy,

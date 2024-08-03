@@ -27,6 +27,7 @@ import {
   Stack,
   Tab,
   Tabs,
+  TextField,
   Tooltip,
   Typography,
   useTheme,
@@ -57,6 +58,8 @@ import {
 import { ArticleStatus } from '../Models/enums/ArticleStatus';
 import { ArticleSortOption } from '../Models/Article';
 import { useNavigate } from 'react-router-dom';
+import { changePasswordThunk } from '../store/slices/auth';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const AccountPage: React.FC = () => {
   const theme = useTheme();
@@ -92,6 +95,21 @@ const AccountPage: React.FC = () => {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const [deleteArticleId, setDeleteArticleId] = useState<number | null>(null);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+
+  const { isLoading, error } = useAppSelector((state: RootState) => state.auth);
+
+  const [userEditOpen, setUserEditOpen] = useState(false);
+  const [username, setUsername] = useState(userName || '');
+  const [bio, setBio] = useState(userBio || '');
+
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
   useEffect(() => {
     // 设置debouncedSearchKey，延迟请求
     if (timeoutId) {
@@ -108,13 +126,20 @@ const AccountPage: React.FC = () => {
       getUserArticlesThunk({
         searchKey: debouncedSearchKey || '',
         status: tabValue,
-        pageNumber: 1,
+        pageNumber: currentPage,
         pageSize: 10,
         sortBy: sortOption,
         sortOrder: sortOrder,
       })
     );
-  }, [dispatch, tabValue, sortOption, sortOrder, debouncedSearchKey]);
+  }, [
+    dispatch,
+    tabValue,
+    sortOption,
+    sortOrder,
+    debouncedSearchKey,
+    currentPage,
+  ]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchKey(event.target.value);
@@ -142,14 +167,6 @@ const AccountPage: React.FC = () => {
     setTabValue(newValue);
   };
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-  };
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
@@ -173,6 +190,8 @@ const AccountPage: React.FC = () => {
         await dispatch(fetchUserProfile());
 
         handleClose();
+        setSnackbarMessage('Avatar uploaded successfully!');
+        setSnackbarOpen(true);
       } catch (error) {
         console.error('Error uploading avatar:', error);
       }
@@ -196,7 +215,13 @@ const AccountPage: React.FC = () => {
     setFilterAnchorEl(null);
   };
 
-  const truncateText = (text: string, maxLength: number): string => {
+  const truncateText = (
+    text: string | undefined,
+    maxLength: number
+  ): string => {
+    if (!text) {
+      return '';
+    }
     return text.length > maxLength
       ? `${text.substring(0, maxLength)}...`
       : text;
@@ -220,6 +245,7 @@ const AccountPage: React.FC = () => {
       console.log('Deleting article:', id);
       await dispatch(deleteArticleThunk(id));
       handleDiaClose();
+      setSnackbarMessage('Article deleted successfully!');
       setSnackbarOpen(true);
       dispatch(
         getUserArticlesThunk({
@@ -234,6 +260,57 @@ const AccountPage: React.FC = () => {
     } catch (error) {
       console.error('Error deleting article:', error);
     }
+  };
+
+  const handleClickChangePasswordOpen = () => {
+    setChangePasswordOpen(true);
+  };
+
+  const handleChangePasswordClose = () => {
+    setChangePasswordOpen(false);
+    setCurrentPassword('');
+    setNewPassword('');
+  };
+
+  const handleChangePassword = () => {
+    dispatch(changePasswordThunk({ currentPassword, newPassword })).then(() => {
+      handleChangePasswordClose();
+      navigate('/login');
+    });
+  };
+
+  const handleUserEditOpen = () => {
+    setUserEditOpen(true);
+  };
+  const handleUserEditClose = () => {
+    setUserEditOpen(false);
+  };
+
+  const handleUserEdit = async () => {
+    try {
+      await dispatch(
+        updateUserInfoThunk({ UserName: username, Bio: bio })
+      ).unwrap();
+      await dispatch(fetchUserProfile());
+
+      handleUserEditClose();
+      setSnackbarMessage('Profile updated successfully!');
+      setSnackbarOpen(true);
+      // alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      alert('Failed to update profile');
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
   };
 
   return (
@@ -332,6 +409,7 @@ const AccountPage: React.FC = () => {
                           {/* 操作按钮 */}
                           <Tooltip title="编辑信息" arrow>
                             <IconButton
+                              onClick={handleUserEditOpen}
                               sx={{
                                 boxShadow: 'none',
                                 backgroundColor: theme.palette.primary.main,
@@ -366,6 +444,7 @@ const AccountPage: React.FC = () => {
                                   color: theme.palette.text.secondary,
                                 },
                               }}
+                              onClick={handleClickChangePasswordOpen}
                             >
                               <LockIcon />
                             </IconButton>
@@ -653,39 +732,6 @@ const AccountPage: React.FC = () => {
                                 <DeleteIcon />
                               </IconButton>
                             </Tooltip>
-
-                            <Snackbar
-                              open={snackbarOpen}
-                              autoHideDuration={6000}
-                              onClose={handleSnackbarClose}
-                              anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                              }}
-                              sx={{
-                                mt: 8,
-                                bgcolor: theme.palette.secondary.main,
-                                opacity: 0.9,
-                                borderRadius: 1,
-                              }}
-                            >
-                              <Alert
-                                onClose={handleSnackbarClose}
-                                severity="success"
-                                sx={{
-                                  width: '100%',
-                                  opacity: 0.9,
-                                  backgroundColor: theme.palette.secondary.main,
-                                  borderRadius: 1,
-                                  color: theme.palette.background.default,
-                                  '& .MuiAlert-icon': {
-                                    color: theme.palette.background.default, // 自定义图标颜色
-                                  },
-                                }}
-                              >
-                                文章删除成功！
-                              </Alert>
-                            </Snackbar>
                           </CardActions>
                         </Box>
                       </Box>
@@ -693,6 +739,41 @@ const AccountPage: React.FC = () => {
                   </ListItem>
                 ))}
               </List>
+              {/* Pagination Controls */}
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                width="100%"
+              >
+                <Grid container alignItems="center">
+                  <Grid item xs={4} display="flex" justifyContent="flex-start">
+                    {currentPage > 1 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handlePrevPage}
+                      >
+                        Prev
+                      </Button>
+                    )}
+                  </Grid>
+                  <Grid item xs={4} display="flex" justifyContent="center">
+                    <Typography variant="body1">Page {currentPage}</Typography>
+                  </Grid>
+                  <Grid item xs={4} display="flex" justifyContent="flex-end">
+                    {userArticles.length === 10 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleNextPage}
+                      >
+                        Next
+                      </Button>
+                    )}
+                  </Grid>
+                </Grid>
+              </Box>
             </Box>
           </Grid>
         </Grid>
@@ -724,6 +805,108 @@ const AccountPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={changePasswordOpen} onClose={handleClose}>
+        <DialogTitle>修改密码</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Current Password"
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="New Password"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleChangePasswordClose} color="primary">
+            取消
+          </Button>
+          <Button
+            onClick={handleChangePassword}
+            color="primary"
+            disabled={isLoading}
+          >
+            {isLoading ? <CircularProgress size={24} /> : '确认'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={userEditOpen} onClose={handleUserEditClose}>
+        <DialogTitle>编辑信息</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="用户名"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="简介"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleUserEditClose} color="primary">
+            取消
+          </Button>
+          <Button onClick={handleUserEdit} color="primary">
+            提交
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        sx={{
+          mt: 8,
+          bgcolor: theme.palette.secondary.main,
+          opacity: 0.9,
+          borderRadius: 1,
+        }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity="success"
+          sx={{
+            width: '100%',
+            opacity: 0.9,
+            backgroundColor: theme.palette.secondary.main,
+            borderRadius: 1,
+            color: theme.palette.background.default,
+            '& .MuiAlert-icon': {
+              color: theme.palette.background.default, // 自定义图标颜色
+            },
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

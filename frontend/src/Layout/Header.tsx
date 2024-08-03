@@ -31,6 +31,7 @@ import { useAppDispatch } from '../store/useAppDispatch';
 import { logout } from '../store/slices/auth';
 import { toggleTheme } from '../store/slices/global';
 import { setSearchQuery } from '../store/slices/search';
+import { setSearchMessage } from '../store/slices/article';
 
 const Header: React.FC = () => {
   const theme = useTheme();
@@ -48,6 +49,11 @@ const Header: React.FC = () => {
   const muiTheme = useAppSelector((state: RootState) => state.global.theme);
 
   const [searchInput, setSearchInput] = useState('');
+
+  const handleSearch = () => {
+    dispatch(setSearchMessage(searchInput));
+    navigate('/');
+  };
 
   const handleNewPostClick = () => {
     navigate('/newPost');
@@ -78,10 +84,6 @@ const Header: React.FC = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
-  };
-
-  const handleSearchSubmit = () => {
-    dispatch(setSearchQuery(searchInput));
   };
 
   const toggleDrawer =
@@ -232,10 +234,7 @@ const Header: React.FC = () => {
                     },
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          color="secondary"
-                          onClick={handleSearchSubmit}
-                        >
+                        <IconButton color="secondary" onClick={handleSearch}>
                           <SearchIcon />
                         </IconButton>
                       </InputAdornment>
@@ -244,7 +243,7 @@ const Header: React.FC = () => {
                   sx={{
                     width: '80%',
                     bgcolor: 'background.default',
-                    borderRadius: 1,
+                    borderRadius: 5,
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
                         borderColor: theme.palette.secondary.main,

@@ -1,6 +1,10 @@
 import axios from 'axios';
 import API_URL from '../Constants';
-import { LoginRequest, LoginResponse } from '../Models/Auth';
+import {
+  ChangePasswordRequest,
+  LoginRequest,
+  LoginResponse,
+} from '../Models/Auth';
 import axiosInstance from './utils/AxionInstance';
 
 const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
@@ -11,16 +15,17 @@ const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   return response.data;
 };
 
-const refreshToken = async (token: string) => {
-  const response = await axiosInstance.post(`${API_URL}/refresh-token`, {
-    token,
-  });
+const changePassword = async (data: ChangePasswordRequest) => {
+  const response = await axiosInstance.post(
+    `${API_URL}authenticate/change-password`,
+    data
+  );
   return response.data;
 };
 
 const AuthService = {
   login,
-  refreshToken,
+  changePassword,
 };
 
 export default AuthService;

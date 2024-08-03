@@ -1,9 +1,11 @@
+using System.Security.Claims;
 using backend.Data;
 using backend.Entities;
 using backend.Enums;
 using backend.Modals;
 using backend.Models;
 using backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -101,5 +103,45 @@ public class AuthenticateController : ControllerBase
             Email = userInDb.Email,
             Token = accessToken,
         });
+    }
+
+    [Authorize]
+    [HttpPost]
+    [Route("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // 从 JWT 令牌中获取用户的电子邮件地址
+        var userEmail = User.FindFirstValue(ClaimTypes.Email);
+
+        if (userEmail == null)
+        {
+            return Forbid();
+        }
+
+        var user = await _userManager.FindByEmailAsync(userEmail);
+
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+
+        if (result.Succeeded)
+        {
+            return NoContent();
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(error.Code, error.Description);
+        }
+
+        return BadRequest(ModelState);
     }
 }
