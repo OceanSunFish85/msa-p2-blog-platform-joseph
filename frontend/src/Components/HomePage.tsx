@@ -23,8 +23,8 @@ import {
   Tabs,
   Toolbar,
   Tooltip,
+  useMediaQuery,
 } from '@mui/material';
-import headSection from '../assets/Head-section.png';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -36,6 +36,7 @@ import { useAppDispatch } from '../store/useAppDispatch';
 import { useAppSelector } from '../store/useAppSelecter';
 import {
   getArticlesThunk,
+  getTopArticlesThunk,
   setSelectedArticleId,
 } from '../store/slices/article';
 import { ArticleSortOption } from '../Models/Article';
@@ -53,6 +54,8 @@ const HomePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const articles = useAppSelector((state) => state.article.articles);
   const searchMessage = useAppSelector((state) => state.article.searchMessage);
+  const topArticles = useAppSelector((state) => state.article.topArticles);
+  const isLoading = useAppSelector((state) => state.article.loading);
   const [searchKey, setSearchKey] = useState<string>(searchMessage ?? '');
   const theme = useTheme();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -61,6 +64,7 @@ const HomePage: React.FC = () => {
   );
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (token) {
@@ -70,6 +74,10 @@ const HomePage: React.FC = () => {
       console.log('No token found');
     }
   }, [token]);
+
+  useEffect(() => {
+    dispatch(getTopArticlesThunk());
+  }, [dispatch]);
 
   useEffect(() => {
     setSearchKey(searchMessage);
@@ -155,40 +163,120 @@ const HomePage: React.FC = () => {
         >
           <Grid item xs={12} sx={{ textAlign: 'center' }}>
             <Box sx={{ p: 2, height: '100%', width: '100%' }}>
-              <Card sx={{ backgroundColor: theme.palette.background.default }}>
-                <Grid container>
-                  <Grid item xs={12} md={8}>
-                    <CardMedia
-                      component="img"
-                      height="400"
-                      image={headSection}
-                      alt="Featured Article"
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <CardContent>
-                      <Typography variant="h5" component="div" textAlign="left">
-                        Featured Article Title
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.primary"
-                        textAlign="left"
-                      >
-                        This is a brief description or excerpt of the featured
-                        article, giving readers an overview of the main content.
-                      </Typography>
-                    </CardContent>
-                    <Box display="flex" justifyContent="flex-end" padding="8px">
-                      <CardActions>
-                        <Button size="small" color="secondary">
-                          Read More
-                        </Button>
-                      </CardActions>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Card>
+              {isLoading ? (
+                <Skeleton
+                  variant="rectangular"
+                  width="100%"
+                  height={400}
+                  animation="wave"
+                  sx={{
+                    bgcolor: theme.palette.grey[300],
+                    '&::before': {
+                      bgcolor: theme.palette.grey[400],
+                    },
+                    '&::after': {
+                      bgcolor: theme.palette.grey[200],
+                    },
+                  }}
+                />
+              ) : (
+                topArticles.length > 0 && (
+                  <Card
+                    sx={{ backgroundColor: theme.palette.background.default }}
+                  >
+                    <Grid container>
+                      <Grid item xs={12} md={8}>
+                        <CardMedia
+                          component="img"
+                          height="400"
+                          image={topArticles[0].cover}
+                          alt="Featured Article"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <CardContent>
+                          <Typography
+                            variant="h5"
+                            component="div"
+                            textAlign="left"
+                          >
+                            {topArticles[0].title}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.primary"
+                            textAlign="left"
+                          >
+                            {topArticles[0].summary}
+                          </Typography>
+                        </CardContent>
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          padding="8px"
+                        >
+                          <Box display="flex" alignItems="center">
+                            <VisibilityIcon
+                              fontSize="small"
+                              sx={{ marginRight: '4px' }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ marginRight: '8px' }}
+                            >
+                              {topArticles[0].views}
+                            </Typography>
+                            <CommentIcon
+                              fontSize="small"
+                              sx={{ marginRight: '4px' }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ marginRight: '8px' }}
+                            >
+                              {topArticles[0].commentsCount}
+                            </Typography>
+                            <ThumbUpIcon
+                              fontSize="small"
+                              sx={{ marginRight: '4px' }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ marginRight: '8px' }}
+                            >
+                              {topArticles[0].likes}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ marginRight: '8px' }}
+                            >
+                              {new Date(
+                                topArticles[0].createdAt
+                              ).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                          <CardActions>
+                            <Button
+                              size="small"
+                              color="secondary"
+                              onClick={() =>
+                                handleArticleClick(topArticles[0].id)
+                              }
+                            >
+                              Read More
+                            </Button>
+                          </CardActions>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Card>
+                )
+              )}
             </Box>
           </Grid>
         </Grid>
@@ -276,28 +364,28 @@ const HomePage: React.FC = () => {
                           handleSortOptionClick(ArticleSortOption.Comments)
                         }
                       >
-                        按评论
+                        Comments
                       </MenuItem>
                       <MenuItem
                         onClick={() =>
                           handleSortOptionClick(ArticleSortOption.Views)
                         }
                       >
-                        按阅读量
+                        Views
                       </MenuItem>
                       <MenuItem
                         onClick={() =>
                           handleSortOptionClick(ArticleSortOption.Likes)
                         }
                       >
-                        按喜欢数
+                        Likes
                       </MenuItem>
                       <MenuItem
                         onClick={() =>
                           handleSortOptionClick(ArticleSortOption.Date)
                         }
                       >
-                        按发布时间
+                        Date
                       </MenuItem>
                     </Menu>
                   </Toolbar>

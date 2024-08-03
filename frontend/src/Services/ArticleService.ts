@@ -163,3 +163,15 @@ export const incrementCommentsCount = async (articleId: number) => {
   );
   return response.data;
 };
+
+export const getTopArticles = async () => {
+  try {
+    const response = await axiosInstance.get<ArticleListResponse[]>(
+      `${API_URL}article/top-articles`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching top articles:', error);
+    throw error;
+  }
+};
