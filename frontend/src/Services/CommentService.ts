@@ -3,7 +3,7 @@ import API_URL from '../Constants';
 import axiosInstance from './utils/AxionInstance';
 import { CommentListResponse } from '../Models/Comments';
 
-// 创建评论
+// Add comment to article
 export const addComment = async (
   articleId: number,
   content: string
@@ -20,7 +20,7 @@ export const addComment = async (
   }
 };
 
-// 获取文章的评论列表
+// Get comments by article id
 export const getCommentsByArticleId = async (
   articleId: number
 ): Promise<CommentListResponse[]> => {
@@ -34,7 +34,7 @@ export const getCommentsByArticleId = async (
   }
 };
 
-// 喜欢评论
+// Like comment
 export const addLikeComment = async (commentId: number): Promise<any> => {
   try {
     const response = await axios.post(`${API_URL}comment/like/${commentId}`);
@@ -45,7 +45,7 @@ export const addLikeComment = async (commentId: number): Promise<any> => {
   }
 };
 
-// 不喜欢评论
+// Dislike comment
 export const addDislikeComment = async (commentId: number): Promise<any> => {
   try {
     const response = await axios.post(`${API_URL}comment/dislike/${commentId}`);

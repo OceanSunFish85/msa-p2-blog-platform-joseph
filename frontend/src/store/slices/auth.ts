@@ -1,15 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
 import {
   ChangePasswordRequest,
   LoginRequest,
   LoginResponse,
 } from '../../Models/Auth';
 import AuthService from '../../Services/AuthService';
-import { useDispatch } from 'react-redux';
-import { useAppDispatch } from '../useAppDispatch';
-import { setLoading } from './global';
 
+// Define a type for the slice state
 export interface AuthState {
   username: string | null;
   email: string | null;
@@ -18,7 +15,7 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
 }
-
+// Define the initial state using that type
 const initialState: AuthState = {
   username: null,
   email: null,
@@ -28,11 +25,11 @@ const initialState: AuthState = {
   error: null,
 };
 
-// 尝试从 localStorage 恢复身份验证状态
+// try to get the initial state from local storage
 if (localStorage.getItem('isAuthenticated') === 'true') {
   initialState.isAuthenticated = true;
 }
-
+// Define a thunk that dispatches those actions
 export const login: any = createAsyncThunk<LoginResponse, LoginRequest>(
   'auth/login',
   async (credentials, thunkAPI) => {
@@ -46,7 +43,7 @@ export const login: any = createAsyncThunk<LoginResponse, LoginRequest>(
     }
   }
 );
-
+// Define a thunk that dispatches those actions
 export const changePasswordThunk: any = createAsyncThunk(
   'auth/changePassword',
   async (data: ChangePasswordRequest, thunkAPI) => {
@@ -64,6 +61,7 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    // Log out
     logout: (state) => {
       state.username = null;
       state.email = null;
@@ -89,10 +87,10 @@ const authSlice = createSlice({
           state.email = action.payload.email;
           state.token = action.payload.token;
           state.isAuthenticated = true;
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('token', action.payload.token);
-          localStorage.setItem('username', action.payload.username); // 保存用户名
-          localStorage.setItem('email', action.payload.email); // 保存邮箱
+          localStorage.setItem('isAuthenticated', 'true'); // set the isAuthenticated flag to true
+          localStorage.setItem('token', action.payload.token); // save the token to local storage
+          localStorage.setItem('username', action.payload.username); // save the username to local storage
+          localStorage.setItem('email', action.payload.email); // save the email to local storage
         }
       )
       .addCase(login.rejected, (state, action: PayloadAction<any>) => {

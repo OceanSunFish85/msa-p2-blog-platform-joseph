@@ -6,7 +6,7 @@ import {
   LoginResponse,
 } from '../Models/Auth';
 import axiosInstance from './utils/AxionInstance';
-
+// Login service
 const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   const response = await axios.post<LoginResponse>(
     `${API_URL}authenticate/login`,
@@ -14,7 +14,7 @@ const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   );
   return response.data;
 };
-
+// Change password service
 const changePassword = async (data: ChangePasswordRequest) => {
   const response = await axiosInstance.post(
     `${API_URL}authenticate/change-password`,

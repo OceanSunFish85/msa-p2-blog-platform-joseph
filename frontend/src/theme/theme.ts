@@ -4,23 +4,23 @@ export const lightTheme: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
-      main: '#ffffff', // 白色
+      main: '#ffffff',
     },
     secondary: {
-      main: '#6B46C1', // 淡紫色
-      light: '#9F7AEA', // 较浅的淡紫色
+      main: '#6B46C1',
+      light: '#9F7AEA',
     },
     background: {
-      default: '#ffffff', // 白色
-      paper: '#e0e0e0', // 灰色
+      default: '#ffffff',
+      paper: '#e0e0e0',
     },
     text: {
-      primary: '#000000', // 黑色
-      secondary: '#e0e0e0', // 灰色
+      primary: '#000000',
+      secondary: '#e0e0e0',
     },
     action: {
-      selected: '#6B46C1', // 自定义选中颜色
-      hover: '#6B46C1', // 自定义悬停颜色
+      selected: '#6B46C1',
+      hover: '#6B46C1',
     },
   },
 };
@@ -29,18 +29,18 @@ export const darkTheme: ThemeOptions = {
   palette: {
     mode: 'dark',
     primary: {
-      main: '#303030', // 深灰色
+      main: '#303030',
     },
     secondary: {
-      main: '#6B46C1', // 深紫色
+      main: '#6B46C1',
     },
     background: {
-      default: '#121212', // 深灰色
-      paper: '#1e1e1e', // 更深的灰色
+      default: '#121212',
+      paper: '#1e1e1e',
     },
     text: {
-      primary: '#ffffff', // 白色
-      secondary: '#bbbbbb', // 浅灰色
+      primary: '#ffffff',
+      secondary: '#bbbbbb',
     },
   },
 };

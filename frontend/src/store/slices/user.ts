@@ -1,23 +1,23 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
 import { EditProfileRequest, UserBasicInfo } from '../../Models/User';
 import {
   getUserBasicInfo,
   updateUserProfile,
 } from '../../Services/UserService';
 
+// Define a type for the slice state
 export interface UserState {
   user: UserBasicInfo | null;
   isLoading: boolean;
   error: string | null;
 }
-
+// Define the initial state using that type
 const initialState: UserState = {
   user: null,
   isLoading: false,
   error: null,
 };
-
+// Define fetchUserProfile thunk
 export const fetchUserProfile: any = createAsyncThunk<UserBasicInfo>(
   'user/fetchUserProfile',
   async (_, thunkAPI) => {
@@ -30,7 +30,7 @@ export const fetchUserProfile: any = createAsyncThunk<UserBasicInfo>(
     }
   }
 );
-
+// Define updateUserInfo thunk
 export const updateUserInfoThunk: any = createAsyncThunk<
   UserBasicInfo,
   EditProfileRequest
@@ -48,6 +48,7 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    //clear user profile
     clearUserProfile: (state) => {
       state.user = null;
       localStorage.removeItem('userId');
@@ -71,6 +72,7 @@ const userSlice = createSlice({
           // Save specific fields to localStorage
           localStorage.setItem('userId', action.payload.id ?? '');
           localStorage.setItem('userAvatar', action.payload.avatar ?? '');
+          localStorage.setItem('username', action.payload.userName ?? '');
           localStorage.setItem('userStatus', action.payload.userStatus);
           localStorage.setItem('userRole', action.payload.role ?? '');
           localStorage.setItem('userBio', action.payload.bio ?? '');

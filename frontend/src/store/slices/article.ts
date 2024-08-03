@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import {
   ArticleListResponse,
-  ArticleSortOption,
   GetArticlesParams,
   NewArticleRequest,
   UpdateArticleRequest,
@@ -17,7 +16,7 @@ import {
 } from '../../Services/ArticleService';
 import { getAuthorInfoByArticleId } from '../../Services/UserService';
 
-// 定义 slice 的初始状态
+// Define a type for the slice state
 export interface ArticleState {
   articles: any[];
   userArticles: any[];
@@ -29,7 +28,7 @@ export interface ArticleState {
   error: string | null;
   selectedId?: number | null;
 }
-
+// Define the initial state using that type
 const initialState: ArticleState = {
   articles: [],
   userArticles: [],
@@ -42,7 +41,7 @@ const initialState: ArticleState = {
   selectedId: null,
 };
 
-// 创建异步 thunk action
+// Define the initial state using that type
 export const createNewArticle: any = createAsyncThunk(
   'articles/createNewArticle',
   async (newArticleRequest: NewArticleRequest, { rejectWithValue }) => {
@@ -54,7 +53,7 @@ export const createNewArticle: any = createAsyncThunk(
     }
   }
 );
-
+// Define a thunk that dispatches those actions
 export const updateArticleThunk: any = createAsyncThunk(
   'articles/updateArticle',
   async (params: { id: number; data: UpdateArticleRequest }) => {
@@ -62,7 +61,7 @@ export const updateArticleThunk: any = createAsyncThunk(
     return response;
   }
 );
-
+// Define a thunk that dispatches those actions
 export const getArticlesThunk: any = createAsyncThunk<
   ArticleListResponse[],
   GetArticlesParams
@@ -71,7 +70,7 @@ export const getArticlesThunk: any = createAsyncThunk<
   console.log('response:', response);
   return response;
 });
-
+// Define a thunk that dispatches those actions
 export const getUserArticlesThunk: any = createAsyncThunk<
   ArticleListResponse[],
   GetArticlesParams
@@ -79,7 +78,7 @@ export const getUserArticlesThunk: any = createAsyncThunk<
   const response = await getUserArticles(params);
   return response;
 });
-
+// Define a thunk that dispatches those actions
 export const getArticleByIdThunk: any = createAsyncThunk(
   'article/fetchArticleById',
   async (id: number, thunkAPI) => {
@@ -91,7 +90,7 @@ export const getArticleByIdThunk: any = createAsyncThunk(
     }
   }
 );
-
+// Define a thunk that dispatches those actions
 export const deleteArticleThunk: any = createAsyncThunk(
   'articles/deleteArticle',
   async (id: number) => {
@@ -99,7 +98,7 @@ export const deleteArticleThunk: any = createAsyncThunk(
     return id;
   }
 );
-
+// Define a thunk that dispatches those actions
 export const getAuthorInfoThunk: any = createAsyncThunk(
   'article/fetchAuthorInfo',
   async (authorId: number) => {
@@ -107,7 +106,7 @@ export const getAuthorInfoThunk: any = createAsyncThunk(
     return response;
   }
 );
-
+// Define a thunk that dispatches those actions
 export const getTopArticlesThunk: any = createAsyncThunk(
   'articles/getTopArticles',
   async () => {
@@ -116,21 +115,24 @@ export const getTopArticlesThunk: any = createAsyncThunk(
   }
 );
 
-// 创建 slice
+// Define the slice using the initial state
 const articleSlice = createSlice({
   name: 'articles',
   initialState,
   reducers: {
+    // Set selected article id
     setSelectedArticleId: (state, action: PayloadAction<number>) => {
       state.selectedId = action.payload;
       localStorage.setItem('selectedArticleId', action.payload.toString());
     },
+    // Set search message
     setSearchMessage: (state, action: PayloadAction<string>) => {
       state.searchMessage = action.payload;
       console.log('state.searchMessage:', state.searchMessage);
     },
   },
   extraReducers: (builder) => {
+    // Add reducers for additional action types here, and handle loading state as needed
     builder
       .addCase(createNewArticle.pending, (state) => {
         state.loading = true;
@@ -218,8 +220,6 @@ const articleSlice = createSlice({
       })
       .addCase(deleteArticleThunk.fulfilled, (state, action) => {
         state.loading = false;
-        // 你可以在这里更新你的状态来删除文章
-        // 例如：state.articles = state.articles.filter(article => article.id !== action.payload);
       })
       .addCase(deleteArticleThunk.rejected, (state, action) => {
         state.loading = false;

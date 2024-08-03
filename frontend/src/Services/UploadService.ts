@@ -2,6 +2,7 @@ import axios from 'axios';
 import axiosInstance from './utils/AxionInstance';
 import API_URL from '../Constants';
 
+// Upload avatar
 export const uploadAvatar = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -26,6 +27,7 @@ export const uploadAvatar = async (file: File): Promise<string> => {
   }
 };
 
+// Upload cover
 export const uploadCover = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -48,6 +50,7 @@ export const uploadCover = async (file: File): Promise<string> => {
   }
 };
 
+// Upload article media
 export const uploadArticleMedia = async (files: File[]): Promise<string[]> => {
   const formData = new FormData();
   files.forEach((file) => formData.append('files', file));

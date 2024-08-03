@@ -1,3 +1,4 @@
+// Type definitions for Comments
 export interface CommentListResponse {
   id: number;
   content: string;

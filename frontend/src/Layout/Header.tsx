@@ -30,7 +30,6 @@ import { RootState } from '../store/store';
 import { useAppDispatch } from '../store/useAppDispatch';
 import { logout } from '../store/slices/auth';
 import { toggleTheme } from '../store/slices/global';
-import { setSearchQuery } from '../store/slices/search';
 import { setSearchMessage } from '../store/slices/article';
 
 const Header: React.FC = () => {
@@ -38,54 +37,61 @@ const Header: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-
+  const [searchDrawerOpen, setSearchDrawerOpen] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
   const dispatch = useAppDispatch();
+  const muiTheme = useAppSelector((state: RootState) => state.global.theme);
+  const [searchInput, setSearchInput] = useState('');
   const isAuthenticated = useAppSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
-  const muiTheme = useAppSelector((state: RootState) => state.global.theme);
 
-  const [searchInput, setSearchInput] = useState('');
-
+  // Handle search
   const handleSearch = () => {
     dispatch(setSearchMessage(searchInput));
     navigate('/');
   };
 
+  // Handle new post click
   const handleNewPostClick = () => {
     navigate('/newPost');
   };
 
+  // Handle profile menu open
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
+  // Handle menu close
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
+  // Handle toggle theme
   const handleToggleTheme = () => {
     dispatch(toggleTheme());
   };
 
+  // Handle account click
   const handleAccountClick = () => {
     navigate('/account');
     setAnchorEl(null);
   };
 
+  // Handle user logout
   const handleUserLogout = () => {
     dispatch(logout());
     setAnchorEl(null);
     navigate('/login');
   };
 
+  // Handle search change
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
   };
 
+  // Toggle drawer
   const toggleDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
       if (
@@ -98,6 +104,20 @@ const Header: React.FC = () => {
       setDrawerOpen(open);
     };
 
+  // Toggle search drawer
+  const toggleSearchDrawer =
+    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+      if (
+        event.type === 'keydown' &&
+        ((event as React.KeyboardEvent).key === 'Tab' ||
+          (event as React.KeyboardEvent).key === 'Shift')
+      ) {
+        return;
+      }
+      setSearchDrawerOpen(open);
+    };
+
+  // Account Button Menu
   const isMenuOpen = Boolean(anchorEl);
   const renderMenu = (
     <Menu
@@ -135,6 +155,7 @@ const Header: React.FC = () => {
     </Menu>
   );
 
+  // Mobile Route Drawer
   const renderDrawer = (
     <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
       <List>
@@ -145,6 +166,52 @@ const Header: React.FC = () => {
           <ListItemText primary="Detail" />
         </MenuItem>
       </List>
+    </Drawer>
+  );
+
+  // Mobile Search Drawer
+  const renderSearchDrawer = (
+    <Drawer
+      anchor="top"
+      open={searchDrawerOpen}
+      onClose={toggleSearchDrawer(false)}
+    >
+      <Box sx={{ padding: theme.spacing(2) }}>
+        <TextField
+          placeholder="Search…"
+          variant="outlined"
+          size="small"
+          fullWidth
+          onChange={handleSearchChange}
+          InputProps={{
+            sx: {
+              borderRadius: 5, // 设置搜索栏左右圆形
+            },
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton color="secondary" onClick={handleSearch}>
+                  <SearchIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            bgcolor: 'background.default',
+            borderRadius: 5,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: theme.palette.secondary.main,
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.secondary.dark,
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: theme.palette.secondary.main,
+              },
+            },
+          }}
+        />
+      </Box>
     </Drawer>
   );
 
@@ -175,6 +242,26 @@ const Header: React.FC = () => {
               Joseph Blog
             </Typography>
             {renderDrawer}
+            <IconButton color="inherit" onClick={toggleSearchDrawer(true)}>
+              <SearchIcon />
+            </IconButton>
+            <IconButton onClick={handleToggleTheme} color="inherit">
+              {muiTheme === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+            </IconButton>
+            <IconButton
+              edge="end"
+              aria-label="account of current user"
+              aria-controls="primary-search-account-menu"
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+            <IconButton color="inherit" onClick={handleNewPostClick} edge="end">
+              <AddIcon />
+            </IconButton>
+            {renderSearchDrawer}
           </>
         ) : (
           <Grid container alignItems="center">

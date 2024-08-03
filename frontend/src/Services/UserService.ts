@@ -2,6 +2,7 @@ import API_URL from '../Constants';
 import { AuthorInfo, EditProfileRequest, UserBasicInfo } from '../Models/User';
 import axiosInstance from './utils/AxionInstance';
 
+// Get user basic info
 export const getUserBasicInfo = async (): Promise<UserBasicInfo> => {
   const response = await axiosInstance.get<UserBasicInfo>(
     `${API_URL}user/basicinfo`
@@ -9,6 +10,7 @@ export const getUserBasicInfo = async (): Promise<UserBasicInfo> => {
   return response.data;
 };
 
+// Update user profile
 export const updateUserProfile = async (
   profileData: EditProfileRequest
 ): Promise<UserBasicInfo> => {
@@ -20,6 +22,7 @@ export const updateUserProfile = async (
   return response.data;
 };
 
+// Get author info by article id
 export const getAuthorInfoByArticleId = async (authorId: number) => {
   const response = await axiosInstance.get<AuthorInfo>(
     `${API_URL}user/author/${authorId}`

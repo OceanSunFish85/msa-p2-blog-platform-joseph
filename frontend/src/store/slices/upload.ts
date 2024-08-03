@@ -4,7 +4,7 @@ import {
   uploadAvatar,
   uploadCover,
 } from '../../Services/UploadService';
-
+// Define a type for the slice state
 export interface UploadState {
   isLoading: boolean;
   error: string | null;
@@ -12,7 +12,7 @@ export interface UploadState {
   cover: string | null;
   articleMedia: string[];
 }
-
+// Define the initial state using that type
 const initialState: UploadState = {
   isLoading: false,
   error: null,
@@ -21,7 +21,7 @@ const initialState: UploadState = {
   articleMedia: [],
 };
 
-// Thunks for uploading files
+// Thunks for uploading avatar files
 export const uploadAvatarThunk: any = createAsyncThunk(
   'upload/uploadAvatar',
   async (file: File, { rejectWithValue }) => {
@@ -33,7 +33,7 @@ export const uploadAvatarThunk: any = createAsyncThunk(
     }
   }
 );
-
+// Thunks for uploading cover files
 export const uploadCoverThunk: any = createAsyncThunk(
   'upload/uploadCover',
   async (file: File, { rejectWithValue }) => {
@@ -46,7 +46,7 @@ export const uploadCoverThunk: any = createAsyncThunk(
     }
   }
 );
-
+// Thunks for article media uploading files
 export const uploadArticleMediaThunk: any = createAsyncThunk(
   'upload/uploadArticleMedia',
   async (files: File[], { rejectWithValue }) => {
@@ -64,6 +64,7 @@ const uploadSlice = createSlice({
   name: 'upload',
   initialState,
   reducers: {
+    // Reset the upload state
     resetUploadState: (state) => {
       state.isLoading = false;
       state.error = null;
