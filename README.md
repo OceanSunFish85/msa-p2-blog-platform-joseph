@@ -40,15 +40,12 @@ The project is a blog system with basic features , including login authenticatio
 1. Install dependencies
    ```bash
    npm install
-   ``
+   ```
    ```
 2. Start the development server
-   ``bash
+  ```bash
    npm run dev
-
-   ```
-
-   ```
+```
 
 3. Start Storybook
    ```bash
