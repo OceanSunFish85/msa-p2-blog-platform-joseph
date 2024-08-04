@@ -28,7 +28,6 @@ import { useAppSelector } from '../../store/useAppSelecter';
 import ArticleContent from './ArticleContent';
 import AuthorInfo from './AuthorInfo';
 import ConfirmationDialog from './ConfirmationDialog';
-import ArticleTableContent from './ArticleTableContent';
 import ArticleDetailSnack from './ArticleDetailSnack';
 
 const DetailPage: React.FC = () => {
@@ -39,7 +38,7 @@ const DetailPage: React.FC = () => {
   const quillRef = useRef<HTMLDivElement | null>(null);
   const [articleId, setArticleId] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [headings, setHeadings] = useState<
+  const [_headings, setHeadings] = useState<
     Array<{ id: string; text: string; level: number }>
   >([]);
   const isFavorite = useAppSelector((state) => state.favorite.isFavorite);

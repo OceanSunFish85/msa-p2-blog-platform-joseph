@@ -40,21 +40,18 @@ The project is a blog system with basic features , including login authenticatio
 1. Install dependencies
    ```bash
    npm install
-   ``
    ```
+   
 2. Start the development server
-   ``bash
+  ```bash
    npm run dev
-
    ```
 
-   ```
-
-3. Start Storybook
+4. Start Storybook
    ```bash
    npm run storybook
    ```
-4. Run the test
+5. Run the test
    ```bash
    npm test
    ```
@@ -77,7 +74,7 @@ The project is a blog system with basic features , including login authenticatio
 
 2. Create the database migration
    ```bash
-   dotnet ef migrations add <YourMigrations
+   dotnet ef migrations add <YourMigrations>
    ```
 3. Update the database
 
@@ -94,6 +91,11 @@ The project is a blog system with basic features , including login authenticatio
 5. Start the backend
    ```bash
    dotnet run
+   ```
+6. Run Docker
+   ```bash
+   docker-compose build //build docker
+   docker-compose up //run docker
    ```
 
 ## Completed basic requirements
@@ -121,10 +123,9 @@ The project is a blog system with basic features , including login authenticatio
 - Redux status management
 - Implementing Theme Switching
 - Applying AI Article Summary
+- Using Docker for project containerisation
 
 ## Other
-
-- Project attempted to use Docker containerisation, but encountered issues with linking Azure SQL, not fully fixed due to time constraints
 
 ## Contact Us
 

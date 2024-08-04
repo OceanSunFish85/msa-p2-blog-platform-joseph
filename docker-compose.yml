@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   frontend:
@@ -15,12 +15,16 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "5078:8080"
+      - "5078:80"
     networks:
       - app-network
-    environment:
-      - ConnectionStrings__DefaultConnection=Server=tcp:msap2softjc.database.windows.net,1433;Initial Catalog=msap2softdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default
+    
+    volumes:
+      - data-protection-keys:/root/.aspnet/DataProtection-Keys
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  data-protection-keys:
