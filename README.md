@@ -1,4 +1,5 @@
 # Blog System
+This repository is use to submit MSA Phase 2 Software Stream
 
 ## Project Information
 
