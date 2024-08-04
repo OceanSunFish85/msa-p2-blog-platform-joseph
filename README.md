@@ -44,14 +44,14 @@ The project is a blog system with basic features , including login authenticatio
    
 2. Start the development server
   ```bash
-  npm run dev
-  ```
+   npm run dev
+   ```
 
-3. Start Storybook
+4. Start Storybook
    ```bash
    npm run storybook
    ```
-4. Run the test
+5. Run the test
    ```bash
    npm test
    ```
