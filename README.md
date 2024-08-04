@@ -57,9 +57,9 @@ The project is a blog system with basic features , including login authenticatio
    ```
 2. Start the development server
 
-```bash
- npm run dev
-```
+   ```bash
+    npm run dev
+   ```
 
 4. Start Storybook
    ```bash
