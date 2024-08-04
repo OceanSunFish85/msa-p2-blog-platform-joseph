@@ -5,6 +5,7 @@ This repository is use to submit MSA Phase 2 Software Stream
 The project has been successfully deployed on the Azure platform: https://msap2-blog-frontend.azurewebsites.net/
 
 I'm offering two experience accounts here
+
 joseph938@test.mail
 
 joseph937@test.mail
