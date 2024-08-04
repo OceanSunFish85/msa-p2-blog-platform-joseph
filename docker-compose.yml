@@ -19,7 +19,7 @@ services:
     networks:
       - app-network
     environment:
-      - ConnectionStrings__DefaultConnection=Server=tcp:msa2blogserver.database.windows.net,1433;Initial Catalog=blogDb;Persist Security Info=False;User ID=josephchen935;Password=0274406978King;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+      - ConnectionStrings__DefaultConnection=Server=tcp:yourserver.database.windows.net,1433;Initial Catalog=blogDb;Persist Security Info=False;User ID={};Password={};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
     volumes:
       - data-protection-keys:/root/.aspnet/DataProtection-Keys
 
