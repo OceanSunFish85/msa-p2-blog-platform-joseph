@@ -18,7 +18,8 @@ services:
       - "5078:80"
     networks:
       - app-network
-    
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=tcp:;
     volumes:
       - data-protection-keys:/root/.aspnet/DataProtection-Keys
 
