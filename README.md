@@ -66,6 +66,7 @@ The project is a blog system with basic features , including login authenticatio
 - Azure SQL
 
 ### Installation and operation
+Due to github protection I removed the database link strings from docker-compose and backend appsetting, please add your own sql server strings and use ef migration and update to create the correct database tables before deploying again!
 
 1. Modify the database connection
 
@@ -97,6 +98,7 @@ The project is a blog system with basic features , including login authenticatio
    docker-compose build //build docker
    docker-compose up //run docker
    ```
+   When 
 
 ## Completed basic requirements
 
