@@ -1,5 +1,17 @@
 # Blog System
+
 This repository is use to submit MSA Phase 2 Software Stream
+
+The project has been successfully deployed on the Azure platform: https://msap2-blog-frontend.azurewebsites.net/
+
+I'm offering two experience accounts here
+joseph938@test.mail
+
+joseph937@test.mail
+
+the passward is 'passward'
+
+In addition, the registration function can be used normally but due to time relations I did not produce a response, if you use only need to click on the registration and then log in, pay attention to the mailbox can not be duplicated!
 
 ## Project Information
 
@@ -42,11 +54,11 @@ The project is a blog system with basic features , including login authenticatio
    ```bash
    npm install
    ```
-   
 2. Start the development server
-  ```bash
-   npm run dev
-   ```
+
+```bash
+ npm run dev
+```
 
 4. Start Storybook
    ```bash
@@ -67,6 +79,7 @@ The project is a blog system with basic features , including login authenticatio
 - Azure SQL
 
 ### Installation and operation
+
 Due to github protection I removed the database link strings from docker-compose and backend appsetting, please add your own sql server strings and use ef migration and update to create the correct database tables before deploying again!
 
 1. Modify the database connection
@@ -99,7 +112,7 @@ Due to github protection I removed the database link strings from docker-compose
    docker-compose build //build docker
    docker-compose up //run docker
    ```
-   When 
+   When
 
 ## Completed basic requirements
 
@@ -127,6 +140,7 @@ Due to github protection I removed the database link strings from docker-compose
 - Implementing Theme Switching
 - Applying AI Article Summary
 - Using Docker for project containerisation
+- Deployed on Azure
 
 ## Other
 
