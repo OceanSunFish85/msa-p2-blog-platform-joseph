@@ -46,9 +46,9 @@ const ChatComponent: React.FC = () => {
       setIsLoggedIn(false);
       return;
     }
-    // create new connection
+    // create new connection//http://localhost:5078/chatHub
     const newConnection = new HubConnectionBuilder()
-      .withUrl('http://localhost:5078/chatHub', {
+      .withUrl('https://msap2-blog-backend.azurewebsites.net/chatHub', {
         accessTokenFactory: () => token, // pass token to the server
       })
       .configureLogging(LogLevel.Information)

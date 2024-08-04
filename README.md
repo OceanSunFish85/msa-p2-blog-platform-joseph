@@ -1,5 +1,17 @@
 # Blog System
+
 This repository is use to submit MSA Phase 2 Software Stream
+
+The project has been successfully deployed on the Azure platform: https://msap2-blog-frontend.azurewebsites.net/
+
+I'm offering two experience accounts here
+joseph938@test.mail
+
+joseph937@test.mail
+
+the passward is 'passward'
+
+In addition, the registration function can be used normally but due to time relations I did not produce a response, if you use only need to click on the registration and then log in, pay attention to the mailbox can not be duplicated!
 
 ## Project Information
 
@@ -128,6 +140,7 @@ Due to github protection I removed the database link strings from docker-compose
 - Implementing Theme Switching
 - Applying AI Article Summary
 - Using Docker for project containerisation
+- Deployed on Azure
 
 ## Other
 

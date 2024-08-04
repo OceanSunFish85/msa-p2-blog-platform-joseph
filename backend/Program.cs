@@ -62,7 +62,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // Replace with your React app URL
+            policy.WithOrigins("https://msap2-blog-frontend.azurewebsites.net") // Replace with your React app URL //http://localhost:5173
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
@@ -188,5 +188,8 @@ app.MapControllers();
 
 // Add SignalR middleware
 app.MapHub<ChatHub>("/chatHub");
+
+// use url add to listen 80 port
+app.Urls.Add("http://*:80");
 
 app.Run();

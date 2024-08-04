@@ -22,8 +22,11 @@ WORKDIR /app
 # 复制构建文件到运行时镜像
 COPY --from=build /app/out .
 
+# 设置 ASPNETCORE_URLS 环境变量以确保监听端口 80
+ENV ASPNETCORE_URLS=http://+:80
+
 # 暴露端口
-EXPOSE 5078
+EXPOSE 80
 
 # 运行应用
 ENTRYPOINT ["dotnet", "JosephBlog.dll"]
