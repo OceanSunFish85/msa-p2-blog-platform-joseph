@@ -113,7 +113,7 @@ Due to github protection I removed the database link strings from docker-compose
    docker-compose build //build docker
    docker-compose up //run docker
    ```
-   When
+   Note that when deploying your local or docker containerisation take care to add your local or cloud Sql Server link string ahead of time, otherwise the project build may fail.
 
 ## Completed basic requirements
 
